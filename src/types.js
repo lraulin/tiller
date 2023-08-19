@@ -3,6 +3,8 @@
  */
 
 /**
+ * Represents an item from the Category table.
+ *
  * @typedef {object} Category
  * @property {string} name
  * @property {CategoryType} type
@@ -11,6 +13,13 @@
  */
 
 /**
+ * Object to retrieve category information by category name.
+ *
+ * @typedef {Object.<string, Category>} CategoryLookup
+ */
+
+/**
+ * Represents an item from the Transaction table.
  * @typedef {object} Transaction
  * @property {Date} date
  * @property {number} amount

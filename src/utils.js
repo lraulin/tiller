@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 /**
  *
  *
@@ -44,25 +46,8 @@ const getAmounts = (transactions) => transactions.map((t) => t.amount);
  */
 const negatives = (arr) => arr.filter((n) => n < 0);
 
-/**
- *
- * @param {number} n
- * @returns {string}
- */
-const fmtUSD = (n) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(n);
-
-const addDays = (date = new Date(), days = 0) => {
-  const newDate = new Date(date.toDateString());
-  newDate.setDate(date.getDate() + days);
-  return newDate;
-};
-
 const prevWeekStartDate = (date = new Date()) =>
-  addDays(getWeekStartDate(date), -7);
+  dayjs(date).startOf("week").add(-7, "day");
 
 const combineFilters =
   (...filters) =>
@@ -70,4 +55,4 @@ const combineFilters =
     return filters.map((filter) => filter(item)).every((x) => x === true);
   };
 
-const newDateNoTime = () => new Date(new Date().toDateString());
+const newDateNoTime = () => dayjs().startOf("day");

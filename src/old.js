@@ -36,43 +36,28 @@ const categories = (() => {
   }, {});
 })();
 
-const transactions = (() => {
-  const transData = getDataFromSheet(sheets.transactions);
-  const o = {};
-  let count = 0;
-  for (const x of Object.keys(transData[0])) {
-    o[x] = count;
-    o[count] = x;
-    count++;
-  }
-  return transData
-    .map((row) =>
-      newTransaction({
-        date: row["Date"],
-        account: row["Account"],
-        description: row["Description"],
-        amount: row["Amount"],
-        category: categories[row["Category"]],
-        institution: row["Institution"],
-        transactionId: row["Transaction ID"],
-        checkNumber: row["Check Number"],
-        fullDescription: row["Full Description"],
-        dateAdded: row["Date Added"],
-        month: row["Month"],
-        week: row["Week"],
-        accountNum: row["Account #"],
-      })
-    )
-    .filter((t) => !t.category.hidden);
-})();
+/**
+ *
+ * @param {import("./types").CategoryType} type
+ * @returns {function(Category[], Transaction[]): Transaction[]}
+ */
+const makeTypeFilter = (type) => (categories, transactions) => {
+  const expenseCategories = categories
+    .filter((c) => c.type === type)
+    .map((c) => c.name);
+  return transactions.filter((t) => expenseCategories.includes(t.category));
+};
 
-const expenses = transactions.filter(
-  (t) => t.category.type === TransTypes.Expense
-);
-const income = transactions.filter(
-  (t) => t.category.type === TransTypes.Income
-);
+const filterExpenses = makeTypeFilter("Expense");
 
+const filterIncome = makeTypeFilter("Income");
+
+/**
+ *
+ * @param {Transaction[]} trans
+ * @param {Date} date
+ * @returns {Transaction[]}
+ */
 const filterByDay = (trans, date) =>
   trans.filter((t) => t.date.toDateString() === date.toDateString());
 

@@ -13,13 +13,18 @@ const sheets = {
   monthly: getSheetByName(MONTHLY_SHEET),
 };
 
+/**
+ * Get data from Categories sheet.
+ *
+ * @return {import("./types").CategoryLookup}
+ */
 const getCategories = () => {
   const [, rows] = sheets.categories.getDataRange().getValues();
-  return rows.map(rowToCategory);
+  return Object.fromEntries(rows.map(rowToCategory).map((c) => [c.name, c]));
 };
 
 /**
- * Get data from Transactions sheet
+ * Get data from Transactions sheet.
  *
  * @return {Transaction[]}
  */
