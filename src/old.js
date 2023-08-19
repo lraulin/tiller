@@ -1,144 +1,4 @@
-/**
- * Constants
- */
-
-const TRANSACTIONS_SHEET = "Transactions";
-const CATEGORIES_SHEET = "Categories";
-const MONTHLY_SHEET = "Monthly";
-const WEEKLY_SHEET = "Weekly";
-const DAILY_SHEET = "Daily";
-const DIRECT_EXPRESS_SHEET = "Direct Express";
-
-const MONTHLY_TAKE_HOME = 4848;
-const WEEKLY_TAKE_HOME = MONTHLY_TAKE_HOME / 4; // 1,212
-const YEARLY_TAKE_HOME = MONTHLY_TAKE_HOME * 12; // 58,176
-
-/**
- * Model/Factories
- */
-
-const TransTypes = Object.freeze({
-  Expense: "Expense",
-  Income: "Income",
-  Transfer: "Transfer",
-  Unknown: "Unknown",
-});
-
-const stringToTransType = (s = "") => {
-  if (s === "Expense") {
-    return TransTypes.Expense;
-  }
-
-  if (s === "Income") {
-    return TransTypes.Income;
-  }
-
-  if (s === "Transfer") {
-    return TransTypes.Transfer;
-  }
-
-  return TransTypes.Unknown;
-};
-
-const newCategory = ({
-  name = "",
-  type = TransTypes.Unknown,
-  group = "",
-  hidden = false,
-} = {}) => ({ name, type, group, hidden });
-
-const newTransaction = ({
-  date = new Date(),
-  account = "",
-  amount = 0,
-  transactionId = "",
-  description = "",
-  checkNumber = 0,
-  category = newCategory(),
-  accountNum = "",
-  month = new Date(),
-  week = new Date(),
-  fullDescription = "",
-  dateAdded = new Date(),
-  institution = "",
-} = {}) => ({
-  date,
-  account,
-  amount,
-  description,
-  category,
-  transactionId,
-  checkNumber,
-  fullDescription,
-  dateAdded,
-  month,
-  week,
-  accountNum,
-  institution,
-});
-
-const transactionToRow = (t = newTransaction()) => [
-  ,
-  t.date,
-  t.description,
-  t.category.name,
-  t.amount,
-  t.account,
-  t.accountNum,
-  t.institution,
-  t.month,
-  t.week,
-  t.transactionId,
-  ,
-  ,
-  t.fullDescription,
-  t.dateAdded,
-  ,
-];
-
-/**
- * General Utils
- */
-
-const ascending = (a, b) => a - b;
-const descending = (a, b) => b -a;
-
-const log = (x) =>{
-  const [k, v] = Object.entries(x)[0]
-  Logger.log("*** " + k + " ***")
-  Logger.log(v)
-}
-
-const sum = (arr = []) => arr.reduce((a, c) => a + c, 0);
-
-const getAmounts = (transactions = [newTransaction()]) =>
-  transactions.map((t) => t.amount);
-
-const negatives = (arr = []) => arr.filter((n) => n < 0);
-
-const fmtUSD = (n = 0) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(n);
-
-const addDays = (date = new Date(), days = 0) => {
-  const newDate = (new Date(date.toDateString()));
-  newDate.setDate(date.getDate() + days)
-  return newDate;
-}
-
-
-const prevWeekStartDate = (date = new Date()) =>
-  addDays(getWeekStartDate(date), -7);
-
-const combineFilters =
-  (...filters) =>
-  (item) => {
-    return filters.map((filter) => filter(item)).every((x) => x === true);
-  };
-
-const newDateNoTime = () => new Date((new Date()).toDateString());
+import dayjs from "dayjs";
 
 /**
 /* 
@@ -154,38 +14,6 @@ const getFirstLastTransactionDates = (trans = [newTransaction()]) => {
   const first = new Date(dts[0]);
   const last = new Date(dts[dts.length - 1]);
   return [first, last];
-};
-
-const getSheetByName = (name = "") => {
-  if (!name) throw new Error("Called 'getSheetByName' with falsy argument");
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
-  if (!sheet) throw new Error(`Failed to get sheet '${name}'`);
-  return sheet;
-};
-
-const sheets = {
-  transactions: getSheetByName(TRANSACTIONS_SHEET),
-  categories: getSheetByName(CATEGORIES_SHEET),
-  daily: getSheetByName(DAILY_SHEET),
-  weekly: getSheetByName(WEEKLY_SHEET),
-  monthly: getSheetByName(MONTHLY_SHEET),
-};
-
-const getSheetVals = (sheet = SpreadsheetApp.getActiveSpreadsheet()) =>
-  sheet.getDataRange().getValues();
-
-const getDataFromSheet = (sheet) => {
-  if (!sheet) throw new Error("Called 'getDatafrom sheet' with falsy argument");
-
-  const [headers, ...data] = getSheetVals(sheet);
-
-  return data.map((row) => {
-    return row.reduce((acc, value, i) => {
-      const key = headers[i];
-      if (key === "") return acc;
-      return { ...acc, [key]: value };
-    }, {});
-  });
 };
 
 //************************** */
@@ -254,16 +82,24 @@ const spendingForDay = (date = new Date()) =>
 const filterByMonth = (trans, date = new Date()) =>
   trans.filter((t) => sameMonth(t.date, date));
 
-const filterByDateRange = (trans, start, stop) => trans.filter(t=> t.date.getTime() >= start.getTime() && t.date.getTime() < stop.getTime())
+const filterByDateRange = (trans, start, stop) =>
+  trans.filter(
+    (t) =>
+      t.date.getTime() >= start.getTime() && t.date.getTime() < stop.getTime()
+  );
 
-const spendingForWeek = (date) => sumAmounts(filterByDateRange(expenses, date, addDays(date, 7)))
+const spendingForWeek = (date) =>
+  sumAmounts(filterByDateRange(expenses, date, addDays(date, 7)));
 
 const spendingForMonth = (date = new Date()) =>
   sumAmounts(filterByMonth(expenses, date));
 
-const incomeForMonth = (date = new Date()) => sumAmounts(filterByMonth(income, date));
+const incomeForMonth = (date = new Date()) =>
+  sumAmounts(filterByMonth(income, date));
 
-const firstTransactionDate = new Date(transactions.map(t=>t.date.getTime()).sort(ascending)[0])
+const firstTransactionDate = new Date(
+  transactions.map((t) => t.date.getTime()).sort(ascending)[0]
+);
 
 function importDirectExpress() {
   const deTransactions = transactions.filter(
@@ -377,7 +213,7 @@ function fillMonthlySpendingByCategory() {
  */
 
 // function removeEmptyRows(sh){
-//   const maxRows = sh.getMaxRows(); 
+//   const maxRows = sh.getMaxRows();
 //   const lastRow = sh.getLastRow();
 //   sh.deleteRows(lastRow+1, maxRows-lastRow);
 // }
@@ -395,9 +231,7 @@ function weekStartDate(date = new Date()) {
 function appendToSheet(sheet, data) {
   if (!data.length) log("No data to append!");
   const lastRow = sheet.getLastRow();
-  sheet
-    .getRange(lastRow + 1, 1, data.length, data[0].length)
-    .setValues(data);
+  sheet.getRange(lastRow + 1, 1, data.length, data[0].length).setValues(data);
 }
 
 function fillMonthlySpendingTable() {
@@ -407,13 +241,19 @@ function fillMonthlySpendingTable() {
 
   const months = [];
   while (currentMonth.getTime() > firstMonth.getTime()) {
-    log({currentMonth});
-    months.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), currentMonth.getDate()));
-    currentMonth.setMonth(currentMonth.getMonth()-1);
+    log({ currentMonth });
+    months.push(
+      new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth(),
+        currentMonth.getDate()
+      )
+    );
+    currentMonth.setMonth(currentMonth.getMonth() - 1);
   }
-  log({months})
-  const numberOfMonths = months.length
-  log({numberOfMonths})
+  log({ months });
+  const numberOfMonths = months.length;
+  log({ numberOfMonths });
 
   const rows = months.map((month) => {
     const spending = spendingForMonth(month);
@@ -430,70 +270,23 @@ function fillMonthlySpendingTable() {
   appendToSheet(sheets.monthly, data);
 }
 
-function everyDay(startDate = new Date('2023-03-01'), endDate = new Date('2023-03-87')) {
-// array of dates
-const datesArray = [];
+function everyDay(
+  startDate = new Date("2023-03-01"),
+  endDate = new Date("2023-03-87")
+) {
+  // array of dates
+  const datesArray = [];
 
-// loop from start date to end date
-for (
-      let date = startDate; 
-      date <= endDate; 
-      date.setDate(date.getDate() + 1)
-    ) 
-{
-  datesArray.push(new Date(date));
-}
-return datesArray.map(d=>d.getTime()).sort(descending).map(t=>new Date(t))
-}
-
-function fillDailySpendingTable() {
-  const today = newDateNoTime()
-  const dates = everyDay(firstTransactionDate, today)
-  const rows = dates.map(date => {
-    return [date,spendingForDay(date)]
-  })
-  const headers = ["Date", "Spending"]
-  const data = [headers, ...rows]
-  sheets.daily.clearContents()
-  appendToSheet(sheets.daily, data)
-}
-
-function everyWeek(startDate = new Date('2023-03-01'), endDate = new Date('2023-03-87')) {
-// array of dates
-const datesArray = [];
-
-// loop from start date to end date
-for (
-      let date = endDate; 
-      date >= startDate; 
-      date.setDate(date.getDate() - 7)
-    ) 
-{
-  datesArray.push(new Date(date));
-}
-return datesArray
-}
-
-function fillWeeklySpendingTable() {
-  const today = newDateNoTime()
-  const weekStart = weekStartDate(today)
-  const weeks = everyWeek(firstTransactionDate, weekStart)
-  log({weeks})
-  const headers = ["Date", "Spending", "% Saved", "Over Budget"]
-  const rows = weeks.map(week => {
-    const spending = spendingForWeek(week)
-    const percentSaved = spending < WEEKLY_TAKE_HOME ? (WEEKLY_TAKE_HOME - spending) / WEEKLY_TAKE_HOME : 0
-    const overBudget = spending > WEEKLY_TAKE_HOME ? spending - WEEKLY_TAKE_HOME : 0
-    return [week,spending,  percentSaved, overBudget]
-  })
-  const data = [headers, ...rows]
-  sheets.weekly.clearContents()
-  appendToSheet(sheets.weekly, data)
-}
-
-function fillCustomSheets() {
-  fillDailySpendingTable()
-  fillMonthlySpendingTable()
-  fillWeeklySpendingTable()
-  importDirectExpress()
+  // loop from start date to end date
+  for (
+    let date = startDate;
+    date <= endDate;
+    date.setDate(date.getDate() + 1)
+  ) {
+    datesArray.push(new Date(date));
+  }
+  return datesArray
+    .map((d) => d.getTime())
+    .sort(descending)
+    .map((t) => new Date(t));
 }
