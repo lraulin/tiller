@@ -1,6 +1,13 @@
 import dayjs from "dayjs";
 
 /**
+ * 
+ * @param {Transaction} transaction 
+ * @returns {boolean}
+ */
+const notHidden = transaction => transaction.
+
+/**
  *
  *
  * @param {number} a
@@ -55,4 +62,4 @@ const combineFilters =
     return filters.map((filter) => filter(item)).every((x) => x === true);
   };
 
-const newDateNoTime = () => dayjs().startOf("day");
+export const startOfToday = () => dayjs().startOf("day");

@@ -2,13 +2,13 @@
  * Constants
  */
 
-const TRANSACTIONS_SHEET = "Transactions";
-const CATEGORIES_SHEET = "Categories";
-const MONTHLY_SHEET = "Monthly";
-const WEEKLY_SHEET = "Weekly";
-const DAILY_SHEET = "Daily";
-const DIRECT_EXPRESS_SHEET = "Direct Express";
+export const TRANSACTIONS_SHEET = "Transactions";
+export const CATEGORIES_SHEET = "Categories";
+export const MONTHLY_SHEET = "Monthly";
+export const WEEKLY_SHEET = "Weekly";
+export const DAILY_SHEET = "Daily";
+export const DIRECT_EXPRESS_SHEET = "Direct Express";
 
-const MONTHLY_TAKE_HOME = 4848;
-const WEEKLY_TAKE_HOME = MONTHLY_TAKE_HOME / 4; // 1,212
-const YEARLY_TAKE_HOME = MONTHLY_TAKE_HOME * 12; // 58,176
+export const MONTHLY_TAKE_HOME = 4848;
+export const WEEKLY_TAKE_HOME = MONTHLY_TAKE_HOME / 4; // 1,212
+export const YEARLY_TAKE_HOME = MONTHLY_TAKE_HOME * 12; // 58,176

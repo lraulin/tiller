@@ -86,34 +86,7 @@ const firstTransactionDate = new Date(
   transactions.map((t) => t.date.getTime()).sort(ascending)[0]
 );
 
-function importDirectExpress() {
-  const deTransactions = transactions.filter(
-    (x) => x.account === "Direct Express"
-  );
-  const lastId =
-    deTransactions.length === 0
-      ? 0
-      : deTransactions
-          .map((x) => Number(x.transactionId))
-          .sort((a, b) => b - a);
 
-  const deSheet = getSheetByName("DirectExpress");
-  const data = getDataFromSheet(deSheet);
-  const notPending = data.filter((d) => d["DATE"] !== "Pending");
-  const trans = notPending.map((d) =>
-    newTransaction({
-      date: d["DATE"] === "Pending" ? newDateNoTime() : d["DATE"],
-      institution: "Comerica",
-      amount: d["AMOUNT"],
-      transactionId: d["TRANSACTION ID"],
-      description: d["DESCRIPTION"],
-      fullDescription: [d["CITY"], d["STATE"], d["COUNTRY"]].join(", "),
-      account: "Direct Express",
-      accountNum: "xxxx0947",
-      month: monthStartDate(d["DATE"]),
-      week: weekStartDate(d["DATE"]),
-    })
-  );
 
   const newTrans = trans.filter((t) => Number(t.transactionId) > lastId);
   if (newTrans.length === 0) {
@@ -176,14 +149,7 @@ const getMonthsInRange = (start = new Date(), end = new Date()) => {
   return dates;
 };
 
-function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  // Or DocumentApp or FormApp.
-  ui.createMenu("Custom Menu")
-    .addItem("Import Direct Express", "importDirectExpress")
-    .addItem("Fill My Sheets", "fillCustomSheets")
-    .addToUi();
-}
+
 
 function fillMonthlySpendingByCategory() {
   const [firstDate, lastDate] = getFirstLastTransactionDates(transactions);
