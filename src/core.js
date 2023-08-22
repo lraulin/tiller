@@ -1,10 +1,31 @@
+/**@typedef {import("./types").Category} Category */
+/**@typedef {import("./types").CategoryRow} CategoryRow */
+/**@typedef {import("./types").DirectExpressTransaction} DirectExpressTransaction */
+/**@typedef {import("./types").TimeUnit} TimeUnit */
+/**@typedef {import("./types").Transaction} Transaction */
+/**@typedef {import("./types").TransactionRow} TransactionRow */
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import { rowToCategory } from "./converters";
-import { ascending, getDateRange, getDayRange, startOfDate } from "./utils";
-import { transcode } from "buffer";
+import { ascending, descending, getDateRange, startOfDate } from "./utils";
+import { directExpress } from "./consts";
 
 dayjs.extend(isBetween);
+
+/**
+ *
+ *
+ * @param {CategoryRow} r
+ * @return {Category}
+ */
+export const rowToCategory = (r) => {
+  const [name, group, type, hideFromReports] = r;
+  return {
+    name,
+    group,
+    type,
+    hidden: hideFromReports === "Hidden" ? true : false,
+  };
+};
 
 /**
  *
@@ -56,7 +77,7 @@ export const rowsToTransactions = (categoryRows, transactionRows) => {
       checkNumber,
       fullDescription,
       dateAdded,
-      categorizedDate,
+      categorizedDate: categorizedDate ?? null,
     };
   });
 };
@@ -114,4 +135,54 @@ export const getSpendingData = ({
     );
     return [date, total];
   });
+};
+
+/**@type {function(DirectExpressTransaction):Transaction} */
+const directExpressToTiller = ({
+  date,
+  transactionId,
+  description,
+  amount,
+  city,
+  state,
+  country,
+  isPending,
+}) => ({
+  date,
+  amount,
+  category: "",
+  type: "Uncategorized",
+  account: directExpress.ACCOUNT_NAME,
+  institution: directExpress.INSTITUTION,
+  accountNumber: directExpress.ACCOUNT_NUMBER,
+  description: isPending ? "[PENDING] " + description : description,
+  fullDescription: [city, state, country].join(", "),
+  transactionId: String(transactionId),
+  accountId: "",
+  checkNumber: "",
+  month: dayjs(date).startOf("month").toDate(),
+  week: dayjs(date).startOf("week").toDate(),
+  dateAdded: new Date(),
+  categorizedDate: null,
+  hidden: false,
+});
+
+/**
+ *
+ * @param {Transaction[]} transactions
+ * @param {DirectExpressTransaction[]} directExpressImport
+ */
+export const getNewTransactionsFromDirectExpress = (
+  transactions,
+  directExpressImport
+) => {
+  const mostRecentId = transactions
+    .filter((t) => t.account === "Direct Express")
+    .map((t) => Number(t.transactionId))
+    .sort(descending)?.[0];
+  const newImports = directExpressImport.filter(
+    (t) => t.transactionId > mostRecentId
+  );
+  const newTillerTransactions = newImports.map(directExpressToTiller);
+  return newTillerTransactions;
 };

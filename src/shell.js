@@ -1,9 +1,19 @@
+/**@typedef {import("./types").TimeUnit} TimeUnit */
 import { sheetNames } from "./consts";
 
-import { filterToExpenses, getSpendingData, rowsToTransactions } from "./core";
+import {
+  filterToExpenses,
+  getNewTransactionsFromDirectExpress,
+  getSpendingData,
+  rowsToTransactions,
+} from "./core";
 
 let allTransactions /**@type {Transaction[]} */ = [];
 let expenses /**@type {Transaction[]} */ = [];
+
+function alert(message) {
+  SpreadsheetApp.getUi().alert(message);
+}
 
 /**
  * Gets Google Sheet by name.
@@ -13,8 +23,8 @@ let expenses /**@type {Transaction[]} */ = [];
  */
 function getSheet(name) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
-   if (!sheet) throw new Error(`Unable to retrieve '${name}' sheet`);
-   return sheet
+  if (!sheet) throw new Error(`Unable to retrieve '${name}' sheet`);
+  return sheet;
 }
 
 /**
@@ -22,10 +32,14 @@ function getSheet(name) {
  *
  */
 function init() {
-  const categoryRows /**@type {CategoryRow[]} */ = getRowsFromSheet(sheetNames.CATEGORIES)
-  const transactionRows /**@type {TransactionRow[]} */ = getRowsFromSheet(sheetNames.TRANSACTIONS)
-  allTransactions = rowsToTransactions(categoryRows, transactionRows)
-  expenses = filterToExpenses(allTransactions)
+  const categoryRows /**@type {CategoryRow[]} */ = getRowsFromSheet(
+    sheetNames.CATEGORIES
+  );
+  const transactionRows /**@type {TransactionRow[]} */ = getRowsFromSheet(
+    sheetNames.TRANSACTIONS
+  );
+  allTransactions = rowsToTransactions(categoryRows, transactionRows);
+  expenses = filterToExpenses(allTransactions);
 }
 
 /**
@@ -35,15 +49,15 @@ function init() {
  * @returns {any[]}
  */
 function getRowsFromSheet(sheetName) {
-   const sheet = getSheet(sheetName)
-     const [, rows] = sheet.getDataRange().getValues();
-     return rows
+  const sheet = getSheet(sheetName);
+  const [, rows] = sheet.getDataRange().getValues();
+  return rows;
 }
 
 /**
- * 
- * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet 
- * @param {any[][]} data 
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @param {any[][]} data
  */
 function appendToSheet(sheet, data) {
   if (!data.length) console.log("No data to append!");
@@ -51,68 +65,55 @@ function appendToSheet(sheet, data) {
   sheet.getRange(lastRow + 1, 1, data.length, data[0].length).setValues(data);
 }
 
+/**
+ * @typedef {object} SpendingTableParams
+ * @property {TimeUnit} unit
+ * @property {string} sheetName
+ */
 
-function fillDailySpendingTable() {
-  const data = getSpendingData({transactions: expenses, lastDate: new Date(), unit: "day"})
-   const sheet = getSheet(sheetNames.DAILY);
+/**
+ * @param {SpendingTableParams} param0
+ */
+function fillSpendingTable({ unit, sheetName }) {
+  const data = getSpendingData({
+    transactions: expenses,
+    lastDate: new Date(),
+    unit,
+  });
+  const sheet = getSheet(sheetName);
   sheet.clearContents();
   appendToSheet(sheet, data);
 }
 
-function fillWeeklySpendingTable() {
-  const today = newDateNoTime();
-  const weekStart = weekStartDate(today);
-  const weeks = everyWeek(firstTransactionDate, weekStart);
-  const headers = ["Date", "Spending", "% Saved", "Over Budget"];
-  const rows = weeks.map((week) => {
-    const spending = spendingForWeek(week);
-    const percentSaved =
-      spending < WEEKLY_TAKE_HOME
-        ? (WEEKLY_TAKE_HOME - spending) / WEEKLY_TAKE_HOME
-        : 0;
-    const overBudget =
-      spending > WEEKLY_TAKE_HOME ? spending - WEEKLY_TAKE_HOME : 0;
-    return [week, spending, percentSaved, overBudget];
+function fillSpendingTables() {
+  /**@type {SpendingTableParams[]} */
+  const params = [
+    { unit: "day", sheetName: sheetNames.DAILY },
+    { unit: "week", sheetName: sheetNames.WEEKLY },
+    { unit: "month", sheetName: sheetNames.MONTHLY },
+  ];
+  params.forEach((params) => {
+    fillSpendingTable(params);
   });
-  const data = [headers, ...rows];
-  sheets.weekly.clearContents();
-  appendToSheet(sheets.weekly, data);
 }
 
 function importDirectExpress() {
-  const deTransactions = allTransactions.filter(
-    (x) => x.account === "Direct Express"
+  const rows = getRowsFromSheet(sheetNames.DIRECT_EXPRESS);
+  const newTillerTransactions = getNewTransactionsFromDirectExpress(
+    allTransactions,
+    rows
   );
-  const lastId =
-    deTransactions.length === 0
-      ? 0
-      : deTransactions
-          .map((x) => Number(x.transactionId))
-          .sort((a, b) => b - a);
-
-  const deSheet = getSheetByName("DirectExpress");
-  const data = getDataFromSheet(deSheet);
-  const notPending = data.filter((d) => d["DATE"] !== "Pending");
-  const trans = notPending.map((d) =>
-    newTransaction({
-      date: d["DATE"] === "Pending" ? newDateNoTime() : d["DATE"],
-      institution: "Comerica",
-      amount: d["AMOUNT"],
-      transactionId: d["TRANSACTION ID"],
-      description: d["DESCRIPTION"],
-      fullDescription: [d["CITY"], d["STATE"], d["COUNTRY"]].join(", "),
-      account: "Direct Express",
-      accountNum: "xxxx0947",
-      month: monthStartDate(d["DATE"]),
-      week: weekStartDate(d["DATE"]),
-    })
+  if (newTillerTransactions.length) {
+    // @ts-ignore
+    appendToSheet(getSheet(sheetNames.TRANSACTIONS), newTillerTransactions);
+  }
+  alert(
+    newTillerTransactions.length + " transactions added from Direct Express"
   );
-
+}
 
 function fillCustomSheets() {
-  fillDailySpendingTable();
-  fillMonthlySpendingTable();
-  fillWeeklySpendingTable();
+  fillSpendingTables();
   importDirectExpress();
 }
 

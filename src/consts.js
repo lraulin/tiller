@@ -2,15 +2,25 @@
  * Constants
  */
 
-export const sheetNames = {
+export const sheetNames = Object.freeze({
   TRANSACTIONS: "Transactions",
   CATEGORIES: "Categories",
   MONTHLY: "Monthly",
   WEEKLY: "Weekly",
   DAILY: "Daily",
   DIRECT_EXPRESS: "Direct Express",
-};
+});
 
-export const MONTHLY_TAKE_HOME = 4848;
-export const WEEKLY_TAKE_HOME = MONTHLY_TAKE_HOME / 4; // 1,212
-export const YEARLY_TAKE_HOME = MONTHLY_TAKE_HOME * 12; // 58,176
+const monthly = 4848;
+
+export const takeHomePay = Object.freeze({
+  MONTHLY: monthly,
+  WEEKLY: monthly / 4, // 1,212
+  YEARLY: monthly * 12, // 58,176
+});
+
+export const directExpress = Object.freeze({
+  ACCOUNT_NAME: "Direct Express",
+  ACCOUNT_NUMBER: "xxxx0947",
+  INSTITUTION: "Comerica",
+});

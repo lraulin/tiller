@@ -2,6 +2,8 @@
  * @typedef {'Expense'|'Income'|'Transfer'|'Uncategorized'} CategoryType
  */
 
+import dayjs from "dayjs";
+
 /**
  * @typedef {'Transactions'|'Categories'|'Direct Express'|'Daily'|'Weekly'|'Monthly'} SheetName
  */
@@ -45,7 +47,7 @@
  * @property {Date} month
  * @property {Date} week
  * @property {Date} dateAdded
- * @property {Date} categorizedDate
+ * @property {Date?} categorizedDate
  */
 
 /**
@@ -141,7 +143,86 @@ const createTransaction = (spec) => {
  * 13	Full Description
  * 14	Date Added
  * 15	Categorized Date
- * @typedef {[undefined, Date, string, string, number, string, string, string, Date, Date, string, string, string, string, Date, Date]} TransactionRow
+ * @typedef {[undefined, Date, string, string, number, string, string, string, Date, Date, string, string, string, string, Date, Date?]} TransactionRow
  */
+
+/**
+ * 0	DATE              string
+ * 1	TRANSACTION ID    number
+ * 2	DESCRIPTION       string
+ * 3	AMOUNT            number
+ * 4	TRANSACTION TYPE  string
+ * 5	CITY              string
+ * 6	STATE             string
+ * 7	COUNTRY           string
+ * @typedef {[DirectExpressDate, number, string, number, string, string, string, string]} DirectExpressRow
+ */
+
+/**@typedef {Date|"Pending"} DirectExpressDate */
+
+/**
+ * @typedef {Object} DirectExpressTransaction
+ * @property {Date} date
+ * @property {number} transactionId
+ * @property {string} description
+ * @property {number} amount
+ * @property {string} transactionType
+ * @property {string} city
+ * @property {string} state
+ * @property {string} country
+ * @property {boolean} isPending
+ */
+
+/** @type {function(DirectExpressRow):DirectExpressTransaction} */
+const directExpressRowToObj = (row) => {
+  const [
+    ,
+    transactionId,
+    description,
+    amount,
+    transactionType,
+    city,
+    state,
+    country,
+  ] = row;
+  const isPending = row[0] === "Pending" ? true : false;
+  const date = row[0] === "Pending" ? new Date() : row[0];
+
+  return {
+    date,
+    transactionId,
+    description,
+    amount,
+    transactionType,
+    city,
+    state,
+    country,
+    isPending,
+  };
+};
+
+/** @type {function(DirectExpressTransaction):DirectExpressRow} */
+const directExpressObjToRow = (obj) => {
+  const {
+    date,
+    transactionId,
+    description,
+    amount,
+    transactionType,
+    city,
+    state,
+    country,
+  } = obj;
+  return [
+    date,
+    transactionId,
+    description,
+    amount,
+    transactionType,
+    city,
+    state,
+    country,
+  ];
+};
 
 export default {};
