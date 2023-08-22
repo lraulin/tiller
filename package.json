@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +14,10 @@
     "dayjs": "^1.11.9"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.1",
     "@types/node": "^20.5.1",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
     "typescript": "^5.1.6"
   }
 }

@@ -2,9 +2,9 @@
  *
  *
  * @param {import("./types").CategoryRow} r
- * @return {Category}
+ * @return {import("./types").Category}
  */
-const rowToCategory = (r) => {
+export const rowToCategory = (r) => {
   const [name, group, type, hideFromReports] = r;
   return {
     name,
@@ -16,54 +16,11 @@ const rowToCategory = (r) => {
 
 /**
  *
- * @param {import("./types").TransactionRow} r
- * @returns {Transaction}
- */
-const rowToTransaction = (r) => {
-  const [
-    ,
-    date,
-    description,
-    category,
-    amount,
-    account,
-    accountNumber,
-    institution,
-    month,
-    week,
-    transactionId,
-    accountId,
-    checkNumber,
-    fullDescription,
-    dateAdded,
-    categorizedDate,
-  ] = r;
-  return {
-    date,
-    description,
-    category,
-    amount,
-    account,
-    accountNumber,
-    institution,
-    month,
-    week,
-    transactionId,
-    accountId,
-    checkNumber,
-    fullDescription,
-    dateAdded,
-    categorizedDate,
-  };
-};
-
-/**
  *
- *
- * @param {Transaction} t
+ * @param {import("./types").Transaction} t
  * @returns {import("./types").TransactionRow}
  */
-const transactionToRow = ({
+export const transactionToRow = ({
   date,
   description,
   category,

@@ -1,5 +1,13 @@
 /**
- * @typedef {'Expense'|'Income'|'Transfer'} CategoryType
+ * @typedef {'Expense'|'Income'|'Transfer'|'Uncategorized'} CategoryType
+ */
+
+/**
+ * @typedef {'Transactions'|'Categories'|'Direct Express'|'Daily'|'Weekly'|'Monthly'} SheetName
+ */
+
+/**
+ * @typedef {'year'|'month'|'week'|'day'} TimeUnit
  */
 
 /**
@@ -24,6 +32,8 @@
  * @property {Date} date
  * @property {number} amount
  * @property {string} category
+ * @property {CategoryType} type
+ * @property {boolean} hidden
  * @property {string} account
  * @property {string} institution
  * @property {string} accountNumber
@@ -37,6 +47,56 @@
  * @property {Date} dateAdded
  * @property {Date} categorizedDate
  */
+
+/**
+ *
+ *
+ * @param {*} spec
+ * @return {Transaction}
+ */
+const createTransaction = (spec) => {
+  const {
+    date,
+    amount,
+    category,
+    account,
+    institution,
+    accountNumber,
+    description,
+    fullDescription,
+    transactionId,
+    accountId,
+    checkNumber,
+    month,
+    week,
+    dateAdded,
+    categorizedDate,
+  } = spec;
+  /**
+   *
+   * @returns {TransactionRow}
+   */
+  const toRow = () => [
+    ,
+    date,
+    description,
+    category,
+    amount,
+    account,
+    accountNumber,
+    institution,
+    month,
+    week,
+    transactionId,
+    accountId,
+    checkNumber,
+    fullDescription,
+    dateAdded,
+    categorizedDate,
+  ];
+
+  return Object.freeze({ ...spec, toRow });
+};
 
 /**
  * Row from Tiller's Categories table
