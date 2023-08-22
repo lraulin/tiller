@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween.js";
 import { ascending, descending, getDateRange } from "./utils.js";
 import { directExpress } from "./consts.js";
-import { directExpressRowToObj } from "./types";
+import { directExpressRowToObj } from "./types.js";
 
 dayjs.extend(isBetween);
 
