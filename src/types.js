@@ -174,7 +174,7 @@ const createTransaction = (spec) => {
  */
 
 /** @type {function(DirectExpressRow):DirectExpressTransaction} */
-const directExpressRowToObj = (row) => {
+export const directExpressRowToObj = (row) => {
   const [
     ,
     transactionId,
@@ -202,7 +202,7 @@ const directExpressRowToObj = (row) => {
 };
 
 /** @type {function(DirectExpressTransaction):DirectExpressRow} */
-const directExpressObjToRow = (obj) => {
+export const directExpressObjToRow = (obj) => {
   const {
     date,
     transactionId,

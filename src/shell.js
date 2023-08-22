@@ -1,12 +1,15 @@
 /**@typedef {import("./types").TimeUnit} TimeUnit */
-import { sheetNames } from "./consts";
+/**@typedef {import("./types").CategoryRow} CategoryRow */
+/**@typedef {import("./types").TransactionRow} TransactionRow */
+/**@typedef {import("./types").DirectExpressRow} DirectExpressRow */
+import { sheetNames } from "./consts.js";
 
 import {
   filterToExpenses,
   getNewTransactionsFromDirectExpress,
   getSpendingData,
   rowsToTransactions,
-} from "./core";
+} from "./core.js";
 
 let allTransactions /**@type {Transaction[]} */ = [];
 let expenses /**@type {Transaction[]} */ = [];
@@ -32,11 +35,11 @@ function getSheet(name) {
  *
  */
 function init() {
-  const categoryRows /**@type {CategoryRow[]} */ = getRowsFromSheet(
-    sheetNames.CATEGORIES
+  const categoryRows = /**@type {CategoryRow[]} */ (
+    getRowsFromSheet(sheetNames.CATEGORIES)
   );
-  const transactionRows /**@type {TransactionRow[]} */ = getRowsFromSheet(
-    sheetNames.TRANSACTIONS
+  const transactionRows = /**@type {TransactionRow[]} */ (
+    getRowsFromSheet(sheetNames.TRANSACTIONS)
   );
   allTransactions = rowsToTransactions(categoryRows, transactionRows);
   expenses = filterToExpenses(allTransactions);
@@ -46,11 +49,11 @@ function init() {
  * Get values from Google Sheet of specified name.
  *
  * @param {string} sheetName
- * @returns {any[]}
+ * @returns {any[][]}
  */
 function getRowsFromSheet(sheetName) {
   const sheet = getSheet(sheetName);
-  const [, rows] = sheet.getDataRange().getValues();
+  const [, ...rows] = sheet.getDataRange().getValues();
   return rows;
 }
 
@@ -97,8 +100,10 @@ function fillSpendingTables() {
   });
 }
 
-function importDirectExpress() {
-  const rows = getRowsFromSheet(sheetNames.DIRECT_EXPRESS);
+export function importDirectExpress() {
+  const rows = /**@type {DirectExpressRow[]} */ (
+    getRowsFromSheet(sheetNames.DIRECT_EXPRESS)
+  );
   const newTillerTransactions = getNewTransactionsFromDirectExpress(
     allTransactions,
     rows
@@ -112,12 +117,13 @@ function importDirectExpress() {
   );
 }
 
-function fillCustomSheets() {
+export function fillCustomSheets() {
   fillSpendingTables();
   importDirectExpress();
 }
 
-function onOpen() {
+export function onOpen() {
+  init();
   const ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu("Lee")

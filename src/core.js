@@ -1,13 +1,15 @@
 /**@typedef {import("./types").Category} Category */
 /**@typedef {import("./types").CategoryRow} CategoryRow */
+/**@typedef {import("./types").DirectExpressRow} DirectExpressRow */
 /**@typedef {import("./types").DirectExpressTransaction} DirectExpressTransaction */
 /**@typedef {import("./types").TimeUnit} TimeUnit */
 /**@typedef {import("./types").Transaction} Transaction */
 /**@typedef {import("./types").TransactionRow} TransactionRow */
 import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
-import { ascending, descending, getDateRange, startOfDate } from "./utils";
-import { directExpress } from "./consts";
+import isBetween from "dayjs/plugin/isBetween.js";
+import { ascending, descending, getDateRange } from "./utils.js";
+import { directExpress } from "./consts.js";
+import { directExpressRowToObj } from "./types";
 
 dayjs.extend(isBetween);
 
@@ -30,9 +32,9 @@ export const rowToCategory = (r) => {
 /**
  *
  *
- * @param {import("./types").CategoryRow[]} categoryRows
- * @param {import("./types").TransactionRow[]} transactionRows
- * @returns {import("./types").Transaction[]}
+ * @param {CategoryRow[]} categoryRows
+ * @param {TransactionRow[]} transactionRows
+ * @returns {Transaction[]}
  */
 export const rowsToTransactions = (categoryRows, transactionRows) => {
   const categoryLookup = Object.fromEntries(
@@ -84,7 +86,7 @@ export const rowsToTransactions = (categoryRows, transactionRows) => {
 
 /**
  *
- * @param {import("./types").Transaction[]} transactions
+ * @param {Transaction[]} transactions
  */
 export const filterToExpenses = (transactions) =>
   transactions.filter((t) => t.hidden === false && t.type === "Expense");
@@ -101,7 +103,7 @@ const sum = (arr) => arr.reduce((a, c) => a + c, 0);
 
 /**
  *
- * @param {import("./types").Transaction[]} transactions
+ * @param {Transaction[]} transactions
  */
 const sumTransactionAmounts = (transactions) =>
   sum(transactions.map((t) => t.amount));
@@ -113,8 +115,8 @@ const sumTransactionAmounts = (transactions) =>
  * If month, it will return a total for each month range, etc.
  *
  * @param {Object} args
- * @param {import("./types").Transaction[]} args.transactions
- * @param {import("./types").TimeUnit} args.unit
+ * @param {Transaction[]} args.transactions
+ * @param {TimeUnit} args.unit
  * @param {Date} args.lastDate
  * @param {Date=} args.firstDate
  * @returns {[Date, number][]}
@@ -137,7 +139,11 @@ export const getSpendingData = ({
   });
 };
 
-/**@type {function(DirectExpressTransaction):Transaction} */
+/**
+ *
+ * @param {DirectExpressTransaction} directExpressRow
+ * @returns {Transaction}
+ */
 const directExpressToTiller = ({
   date,
   transactionId,
@@ -170,19 +176,19 @@ const directExpressToTiller = ({
 /**
  *
  * @param {Transaction[]} transactions
- * @param {DirectExpressTransaction[]} directExpressImport
+ * @param {DirectExpressRow[]} directExpressRows
  */
 export const getNewTransactionsFromDirectExpress = (
   transactions,
-  directExpressImport
+  directExpressRows
 ) => {
   const mostRecentId = transactions
     .filter((t) => t.account === "Direct Express")
     .map((t) => Number(t.transactionId))
     .sort(descending)?.[0];
-  const newImports = directExpressImport.filter(
-    (t) => t.transactionId > mostRecentId
-  );
+  const newImports = directExpressRows
+    .map(directExpressRowToObj)
+    .filter((t) => t.transactionId > mostRecentId);
   const newTillerTransactions = newImports.map(directExpressToTiller);
   return newTillerTransactions;
 };
