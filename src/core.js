@@ -166,8 +166,10 @@ export const getSpendingData = ({
   );
 
   return dates.map((date) => {
-    const total = sumTransactionAmounts(
-      transactions.filter((t) => dayjs(t.date).isSame(date, unit))
+    const total = Math.abs(
+      sumTransactionAmounts(
+        transactions.filter((t) => dayjs(t.date).isSame(date, unit))
+      )
     );
     return [date, total];
   });
