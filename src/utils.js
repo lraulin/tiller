@@ -83,7 +83,7 @@ const combineFilters =
     return filters.map((filter) => filter(item)).every((x) => x === true);
   };
 
-const startOf = (unit) => (date) => dayjs(date).startOf(unit).toDate();
+export const startOf = (unit) => (date) => dayjs(date).startOf(unit).toDate();
 export const startOfDate = startOf("day");
 export const startOfWeek = startOf("week");
 export const startOfMonth = startOf("month");

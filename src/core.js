@@ -6,7 +6,13 @@
 /**@typedef {import("./models/tiller-transaction").Transaction} Transaction */
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween.js";
-import { ascending, descending, getDateRange, isValidDate } from "./utils.js";
+import {
+  ascending,
+  descending,
+  getDateRange,
+  isValidDate,
+  startOf,
+} from "./utils.js";
 import { directExpress } from "./consts.js";
 import { directExpressRowToObj } from "./types.js";
 import { createTransaction } from "./models/tiller-transaction.js";
@@ -151,9 +157,14 @@ export const getSpendingData = ({
   firstDate = getFirstTransactionDate(transactions),
 }) => {
   /**@type {function(Date):Date} */
-  const startOf = (d) => dayjs(d).startOf(unit).toDate();
+  const startOfUnit = startOf(unit);
 
-  const dates = getDateRange(startOf(firstDate), startOf(lastDate), "week");
+  const dates = getDateRange(
+    startOfUnit(firstDate),
+    startOfUnit(lastDate),
+    unit
+  );
+
   return dates.map((date) => {
     const total = sumTransactionAmounts(
       transactions.filter((t) => dayjs(t.date).isSame(date, unit))
