@@ -1,6 +1,8 @@
+/** */
+
 /**@typedef {import("./types").TimeUnit} TimeUnit */
 /**@typedef {import("./types").CategoryRow} CategoryRow */
-/**@typedef {import("./types").TransactionRow} TransactionRow */
+/**@typedef {import("./models/tiller-transaction").Transaction} Transaction*/
 /**@typedef {import("./types").DirectExpressRow} DirectExpressRow */
 import { sheetNames } from "./consts.js";
 
@@ -10,9 +12,6 @@ import {
   getSpendingData,
   rowsToTransactions,
 } from "./core.js";
-
-let allTransactions /**@type {Transaction[]} */ = [];
-let expenses /**@type {Transaction[]} */ = [];
 
 function alert(message) {
   SpreadsheetApp.getUi().alert(message);
@@ -32,17 +31,26 @@ function getSheet(name) {
 
 /**
  * Loads data from spreadsheets.
- *
+ * @returns {Transaction[]}
  */
-function init() {
+function getTransactionData() {
   const categoryRows = /**@type {CategoryRow[]} */ (
     getRowsFromSheet(sheetNames.CATEGORIES)
   );
-  const transactionRows = /**@type {TransactionRow[]} */ (
-    getRowsFromSheet(sheetNames.TRANSACTIONS)
-  );
-  allTransactions = rowsToTransactions(categoryRows, transactionRows);
-  expenses = filterToExpenses(allTransactions);
+  if (categoryRows.length === 0) throw new Error("No categories found");
+
+  const transactionRows = getRowsFromSheet(sheetNames.TRANSACTIONS);
+  if (transactionRows.length === 0) throw new Error("No transactions found");
+
+  return rowsToTransactions(categoryRows, transactionRows);
+}
+
+/**
+ *
+ * @returns {Transaction[]}
+ */
+function getExpenses() {
+  return filterToExpenses(getTransactionData());
 }
 
 /**
@@ -79,7 +87,7 @@ function appendToSheet(sheet, data) {
  */
 function fillSpendingTable({ unit, sheetName }) {
   const data = getSpendingData({
-    transactions: expenses,
+    transactions: getExpenses(),
     lastDate: new Date(),
     unit,
   });
@@ -95,9 +103,7 @@ function fillSpendingTables() {
     { unit: "week", sheetName: sheetNames.WEEKLY },
     { unit: "month", sheetName: sheetNames.MONTHLY },
   ];
-  params.forEach((params) => {
-    fillSpendingTable(params);
-  });
+  params.forEach(fillSpendingTable);
 }
 
 export function importDirectExpress() {
@@ -105,12 +111,14 @@ export function importDirectExpress() {
     getRowsFromSheet(sheetNames.DIRECT_EXPRESS)
   );
   const newTillerTransactions = getNewTransactionsFromDirectExpress(
-    allTransactions,
+    getTransactionData(),
     rows
   );
   if (newTillerTransactions.length) {
-    // @ts-ignore
-    appendToSheet(getSheet(sheetNames.TRANSACTIONS), newTillerTransactions);
+    appendToSheet(
+      getSheet(sheetNames.TRANSACTIONS),
+      newTillerTransactions.map((t) => t.toRow())
+    );
   }
   alert(
     newTillerTransactions.length + " transactions added from Direct Express"
@@ -123,11 +131,17 @@ export function fillCustomSheets() {
 }
 
 export function onOpen() {
-  init();
   const ui = SpreadsheetApp.getUi();
-  // Or DocumentApp or FormApp.
   ui.createMenu("Lee")
     .addItem("Import Direct Express", "importDirectExpress")
     .addItem("Fill My Sheets", "fillCustomSheets")
     .addToUi();
 }
+
+const global = {};
+global.onOpen = onOpen;
+global.fillCustomSheets = fillCustomSheets;
+global.importDirectExpress = importDirectExpress;
+globalThis.onOpen = onOpen;
+globalThis.fillCustomSheets = fillCustomSheets;
+globalThis.importDirectExpress = importDirectExpress;

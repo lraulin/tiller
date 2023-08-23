@@ -3,13 +3,13 @@
 /**@typedef {import("./types").DirectExpressRow} DirectExpressRow */
 /**@typedef {import("./types").DirectExpressTransaction} DirectExpressTransaction */
 /**@typedef {import("./types").TimeUnit} TimeUnit */
-/**@typedef {import("./types").Transaction} Transaction */
-/**@typedef {import("./types").TransactionRow} TransactionRow */
+/**@typedef {import("./models/tiller-transaction").Transaction} Transaction */
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween.js";
-import { ascending, descending, getDateRange } from "./utils.js";
+import { ascending, descending, getDateRange, isValidDate } from "./utils.js";
 import { directExpress } from "./consts.js";
 import { directExpressRowToObj } from "./types.js";
+import { createTransaction } from "./models/tiller-transaction.js";
 
 dayjs.extend(isBetween);
 
@@ -20,6 +20,8 @@ dayjs.extend(isBetween);
  * @return {Category}
  */
 export const rowToCategory = (r) => {
+  if (r.length < 4) throw new Error("Invalid category row");
+
   const [name, group, type, hideFromReports] = r;
   return {
     name,
@@ -33,7 +35,7 @@ export const rowToCategory = (r) => {
  *
  *
  * @param {CategoryRow[]} categoryRows
- * @param {TransactionRow[]} transactionRows
+ * @param {any[]} transactionRows
  * @returns {Transaction[]}
  */
 export const rowsToTransactions = (categoryRows, transactionRows) => {
@@ -41,6 +43,7 @@ export const rowsToTransactions = (categoryRows, transactionRows) => {
     categoryRows.map(rowToCategory).map((c) => [c.name, c])
   );
   return transactionRows.map((r) => {
+    if (r.length < 16) throw new Error("Invalid transaction row");
     const [
       ,
       date,
@@ -62,7 +65,7 @@ export const rowsToTransactions = (categoryRows, transactionRows) => {
     const type = categoryLookup[category]?.type ?? "Uncategorized";
     const hidden = categoryLookup[category]?.hidden ?? false;
 
-    return {
+    return createTransaction({
       date,
       description,
       category,
@@ -79,8 +82,8 @@ export const rowsToTransactions = (categoryRows, transactionRows) => {
       checkNumber,
       fullDescription,
       dateAdded,
-      categorizedDate: categorizedDate ?? null,
-    };
+      categorizedDate,
+    });
   });
 };
 
@@ -91,8 +94,28 @@ export const rowsToTransactions = (categoryRows, transactionRows) => {
 export const filterToExpenses = (transactions) =>
   transactions.filter((t) => t.hidden === false && t.type === "Expense");
 
-const getFirstTransactionDate = (transactions) =>
-  new Date(transactions.map((t) => t.date.getTime()).sort(ascending)[0]);
+/**
+ *
+ * @param {Transaction[]} transactions
+ * @returns {Date}
+ */
+const getFirstTransactionDate = (transactions) => {
+  if (transactions.length === 0) throw new Error("called with empty array");
+  const firstDateTimeStamp = transactions
+    .map((t) => {
+      if (!t.date) throw new Error("Transaction missing date");
+      if (!t.date.getTime) throw new Error("Invalid date in transaction");
+      return t.date.getTime();
+    })
+    .sort(ascending)[0];
+  const firstTransactionDate = new Date(firstDateTimeStamp);
+  if (!isValidDate)
+    throw new Error(
+      "Invalid date; " +
+        JSON.stringify({ firstDateTimeStamp, firstTransactionDate })
+    );
+  return firstTransactionDate;
+};
 
 /**
  *
@@ -153,25 +176,17 @@ const directExpressToTiller = ({
   state,
   country,
   isPending,
-}) => ({
-  date,
-  amount,
-  category: "",
-  type: "Uncategorized",
-  account: directExpress.ACCOUNT_NAME,
-  institution: directExpress.INSTITUTION,
-  accountNumber: directExpress.ACCOUNT_NUMBER,
-  description: isPending ? "[PENDING] " + description : description,
-  fullDescription: [city, state, country].join(", "),
-  transactionId: String(transactionId),
-  accountId: "",
-  checkNumber: "",
-  month: dayjs(date).startOf("month").toDate(),
-  week: dayjs(date).startOf("week").toDate(),
-  dateAdded: new Date(),
-  categorizedDate: null,
-  hidden: false,
-});
+}) =>
+  createTransaction({
+    date,
+    amount,
+    account: directExpress.ACCOUNT_NAME,
+    institution: directExpress.INSTITUTION,
+    accountNumber: directExpress.ACCOUNT_NUMBER,
+    description: isPending ? "[PENDING] " + description : description,
+    fullDescription: [city, state, country].join(", "),
+    transactionId: String(transactionId),
+  });
 
 /**
  *

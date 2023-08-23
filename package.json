@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "mocha",
-    "build": "webpack",
-    "deploy": "npm run build && clasp push \\dist"
+    "build": "rm ./dist/* && cp ./appsscript.json ./dist/ && webpack --mode=production",
+    "deploy": "npm run build && clasp push ./dist"
   },
   "author": "",
   "license": "ISC",
@@ -22,8 +22,10 @@
     "@types/node": "^20.5.1",
     "babel-loader": "^9.1.3",
     "chai": "^4.3.7",
+    "gas-webpack-plugin": "^2.5.0",
     "mocha": "^10.2.0",
     "typescript": "^5.1.6",
-    "webpack": "^5.88.2"
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   }
 }

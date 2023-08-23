@@ -8,7 +8,7 @@ export const sheetNames = Object.freeze({
   MONTHLY: "Monthly",
   WEEKLY: "Weekly",
   DAILY: "Daily",
-  DIRECT_EXPRESS: "Direct Express",
+  DIRECT_EXPRESS: "DirectExpress",
 });
 
 const monthly = 4848;

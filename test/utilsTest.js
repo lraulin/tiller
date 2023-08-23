@@ -32,4 +32,19 @@ describe("getDateRange", () => {
       new Date("8/1/2023"),
     ]);
   });
+
+  it("works when dates are backwards", () => {
+    const res = getDateRange(
+      new Date("08/05/2023"),
+      new Date("08/01/2023"),
+      "day"
+    );
+    expect(res).to.deep.equal([
+      new Date("8/5/2023"),
+      new Date("8/4/2023"),
+      new Date("8/3/2023"),
+      new Date("8/2/2023"),
+      new Date("8/1/2023"),
+    ]);
+  });
 });

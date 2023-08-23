@@ -3,6 +3,7 @@
  */
 
 import dayjs from "dayjs";
+import { startOfDate, startOfMonth, startOfWeek } from "./utils.js";
 
 /**
  * @typedef {'Transactions'|'Categories'|'Direct Express'|'Daily'|'Weekly'|'Monthly'} SheetName
@@ -29,78 +30,6 @@ import dayjs from "dayjs";
  */
 
 /**
- * Represents an item from the Transaction table.
- * @typedef {object} Transaction
- * @property {Date} date
- * @property {number} amount
- * @property {string} category
- * @property {CategoryType} type
- * @property {boolean} hidden
- * @property {string} account
- * @property {string} institution
- * @property {string} accountNumber
- * @property {string} description
- * @property {string} fullDescription
- * @property {string} transactionId
- * @property {string} accountId
- * @property {string} checkNumber
- * @property {Date} month
- * @property {Date} week
- * @property {Date} dateAdded
- * @property {Date?} categorizedDate
- */
-
-/**
- *
- *
- * @param {*} spec
- * @return {Transaction}
- */
-const createTransaction = (spec) => {
-  const {
-    date,
-    amount,
-    category,
-    account,
-    institution,
-    accountNumber,
-    description,
-    fullDescription,
-    transactionId,
-    accountId,
-    checkNumber,
-    month,
-    week,
-    dateAdded,
-    categorizedDate,
-  } = spec;
-  /**
-   *
-   * @returns {TransactionRow}
-   */
-  const toRow = () => [
-    ,
-    date,
-    description,
-    category,
-    amount,
-    account,
-    accountNumber,
-    institution,
-    month,
-    week,
-    transactionId,
-    accountId,
-    checkNumber,
-    fullDescription,
-    dateAdded,
-    categorizedDate,
-  ];
-
-  return Object.freeze({ ...spec, toRow });
-};
-
-/**
  * Row from Tiller's Categories table
  *
  *  0	Category
@@ -120,7 +49,7 @@ const createTransaction = (spec) => {
  * 14	Nov 2023
  * 15	Dec 2023
  *
- * @typedef {[string, string, CategoryType, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]} CategoryRow
+ //* @typedef {[string, string, CategoryType, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string, string]} CategoryRow
  */
 
 /**
@@ -143,7 +72,7 @@ const createTransaction = (spec) => {
  * 13	Full Description
  * 14	Date Added
  * 15	Categorized Date
- * @typedef {[undefined, Date, string, string, number, string, string, string, Date, Date, string, string, string, string, Date, Date?]} TransactionRow
+ * //@typedef {[undefined, Date, string, string, number, string, string, string, Date, Date, string, string, string, string, Date, Date?]} TransactionRow
  */
 
 /**
@@ -155,7 +84,7 @@ const createTransaction = (spec) => {
  * 5	CITY              string
  * 6	STATE             string
  * 7	COUNTRY           string
- * @typedef {[DirectExpressDate, number, string, number, string, string, string, string]} DirectExpressRow
+ //* @typedef {[DirectExpressDate, number, string, number, string, string, string, string]} DirectExpressRow
  */
 
 /**@typedef {Date|"Pending"} DirectExpressDate */
