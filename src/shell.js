@@ -12,22 +12,7 @@ import {
   getSpendingData,
   rowsToTransactions,
 } from "./core.js";
-
-function alert(message) {
-  SpreadsheetApp.getUi().alert(message);
-}
-
-/**
- * Gets Google Sheet by name.
- *
- * @param {string} name
- * @return {GoogleAppsScript.Spreadsheet.Sheet}
- */
-function getSheet(name) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
-  if (!sheet) throw new Error(`Unable to retrieve '${name}' sheet`);
-  return sheet;
-}
+import { alert, appendToSheet, getSheet, sortSheet } from "./sheet-utils.js";
 
 /**
  * Loads data from spreadsheets.
@@ -63,17 +48,6 @@ function getRowsFromSheet(sheetName) {
   const sheet = getSheet(sheetName);
   const [, ...rows] = sheet.getDataRange().getValues();
   return rows;
-}
-
-/**
- *
- * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
- * @param {any[][]} data
- */
-function appendToSheet(sheet, data) {
-  if (!data.length) console.log("No data to append!");
-  const lastRow = sheet.getLastRow();
-  sheet.getRange(lastRow + 1, 1, data.length, data[0].length).setValues(data);
 }
 
 /**
@@ -135,13 +109,35 @@ export function onOpen() {
   ui.createMenu("Lee")
     .addItem("Import Direct Express", "importDirectExpress")
     .addItem("Fill My Sheets", "fillCustomSheets")
+    .addItem("Sort Transactions", "sortTransactions")
+    .addItem("Sort DirectExpress", "sortDirectExpress")
     .addToUi();
 }
 
+export function sortTransactions() {
+  const sheet = getSheet(sheetNames.TRANSACTIONS);
+  sortSheet({ sheet, column: transactionHeaders.Date, ascending: false });
+}
+
+export function sortDirectExpress() {
+  const sheet = getSheet(sheetNames.DIRECT_EXPRESS);
+  sortSheet({
+    sheet,
+    column: directExpressHeaders.DATE,
+    ascending: false,
+  });
+}
+
+// Gas plugin needs assignments to "global" to create top-level functions...
 const global = {};
 global.onOpen = onOpen;
 global.fillCustomSheets = fillCustomSheets;
 global.importDirectExpress = importDirectExpress;
-globalThis.onOpen = onOpen;
-globalThis.fillCustomSheets = fillCustomSheets;
-globalThis.importDirectExpress = importDirectExpress;
+global.sortTransactions = sortTransactions;
+global.sortDirectExpress = sortDirectExpress;
+
+// But apparently Google changed how it works, and "global"
+// is not found, but assigning to "globalThis" works.
+for (const [k, v] of Object.entries(global)) {
+  globalThis[k] = v;
+}
