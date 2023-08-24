@@ -1,5 +1,4 @@
 /**@typedef {import("./services/categories.js").Category} Category */
-/**@typedef {import("./types").DirectExpressRow} DirectExpressRow */
 /**@typedef {import("./services/direct-express.js").DirectExpressTransaction} DirectExpressTransaction */
 /**@typedef {import("./services/tiller-transaction.js").Transaction} Transaction */
 /**@typedef {import("./services/categories.js").TimeUnit} TimeUnit */

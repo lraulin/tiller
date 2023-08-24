@@ -2,7 +2,6 @@
 
 /**@typedef {import("./services/categories.js").TimeUnit} TimeUnit */
 /**@typedef {import("./services/tiller-transaction").Transaction} Transaction*/
-/**@typedef {import("./types.js").DirectExpressRow} DirectExpressRow */
 import { sheetNames } from "./consts.js";
 
 import { filterToExpenses, getSpendingData } from "./core.js";

@@ -1,7 +1,5 @@
 /**@typedef {import("./categories.js").TimeUnit} TimeUnit */
 /**@typedef {import("./categories.js").CategoryType} CategoryType */
-/**@typedef {import("../types").DirectExpressRow} DirectExpressRow */
-
 import { startOfMonth, startOfWeek } from "../utils.js";
 import { getRowsFromSheet, getSheet, overwriteSheet } from "./sheets.js";
 import { getCategoryLookup } from "./categories.js";

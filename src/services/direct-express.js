@@ -7,24 +7,24 @@ const ACCOUNT_NAME = "Direct Express";
 const ACCOUNT_NUMBER = "xxxx0947";
 const INSTITUTION = "Comerica";
 
-// const headers = Object.freeze({
-//   DATE: 1,
-//   "TRANSACTION ID": 2,
-//   DESCRIPTION: 3,
-//   AMOUNT: 4,
-//   "TRANSACTION TYPE": 5,
-//   CITY: 6,
-//   STATE: 7,
-//   COUNTRY: 8,
-//   1: "DATE",
-//   2: "TRANSACTION ID",
-//   3: "DESCRIPTION",
-//   4: "AMOUNT",
-//   5: "TRANSACTION TYPE",
-//   6: "CITY",
-//   7: "STATE",
-//   8: "COUNTRY",
-// });
+const headers = Object.freeze({
+  DATE: 0,
+  "TRANSACTION ID": 1,
+  DESCRIPTION: 2,
+  AMOUNT: 3,
+  "TRANSACTION TYPE": 4,
+  CITY: 5,
+  STATE: 6,
+  COUNTRY: 7,
+  0: "DATE",
+  1: "TRANSACTION ID",
+  2: "DESCRIPTION",
+  3: "AMOUNT",
+  4: "TRANSACTION TYPE",
+  5: "CITY",
+  6: "STATE",
+  7: "COUNTRY",
+});
 
 const directExpressSheet = getSheet(SHEET_NAME);
 let directExpressTransactions = /**@type {DirectExpressTransaction[]} */ ([]);
@@ -77,8 +77,6 @@ const idMapReducer = (accumulator, current) => {
 
   if (copyA.isPending) {
     accumulator[current.transactionId] = copyB;
-  } else {
-    accumulator[current.transactionId] = copyA;
   }
   return accumulator;
 };
@@ -103,6 +101,19 @@ const deDuplicate = (directExpressTransactions) => {
 };
 
 /**
+ * @typedef {Object} DEData
+ * @property {Date?} date
+ * @property {number} transactionId
+ * @property {string} description
+ * @property {number} amount
+ * @property {string} transactionType
+ * @property {string} city
+ * @property {string} state
+ * @property {string} country
+ * @property {boolean} isPending
+ */
+
+/**
  * @typedef {Object} DirectExpressTransaction
  * @property {Date?} date
  * @property {number} transactionId
@@ -113,6 +124,7 @@ const deDuplicate = (directExpressTransactions) => {
  * @property {string} state
  * @property {string} country
  * @property {boolean} isPending
+ * @property {function(DEData):DirectExpressTransaction} init
  * @property {function():any[]} toRow
  */
 
@@ -136,18 +148,19 @@ const directExpressTransactionOLOO = {
     this.state = state;
     this.country = country;
     this.isPending = date === "Pending" ? true : false;
+    return this;
   },
   toRow() {
-    return [
-      this.date ? this.date : "Pending",
-      this.transactionId,
-      this.description,
-      this.amount,
-      this.transactionType,
-      this.city,
-      this.state,
-      this.country,
-    ];
+    const row = Array(8).fill(undefined);
+    row[headers.DATE] = this.isPending ? "Pending" : this.date;
+    row[headers["TRANSACTION ID"]] = this.transactionId;
+    row[headers.DESCRIPTION] = this.description;
+    row[headers.AMOUNT] = this.amount;
+    row[headers["TRANSACTION TYPE"]] = this.transactionType;
+    row[headers.CITY] = this.city;
+    row[headers.STATE] = this.state;
+    row[headers.COUNTRY] = this.country;
+    return row;
   },
   toTiller() {
     return tiller.createTransaction({
@@ -167,27 +180,30 @@ const directExpressTransactionOLOO = {
 
 /**
  *
- * @param {*} param0
+ * @param {any[]} row
  * @returns {DirectExpressTransaction}
  */
-const createFromRow = ([
-  date,
-  transactionId,
-  description,
-  amount,
-  ,
-  city,
-  state,
-  country,
-]) => {
-  const obj = Object.create(directExpressTransactionOLOO);
+const createFromRow = (row) => {
+  const date = row[headers.DATE];
+  const transactionId = row[headers["TRANSACTION ID"]];
+  const description = row[headers.DESCRIPTION];
+  const amount = row[headers.AMOUNT];
+  const transactionType = row[headers["TRANSACTION TYPE"]];
+  const city = row[headers.CITY];
+  const state = row[headers.STATE];
+  const country = row[headers.COUNTRY];
   const isPending = date === "Pending" ? true : false;
+
+  const obj = Object.create(directExpressTransactionOLOO);
   obj.init({
-    date: isValidDate(date) ? date : null,
+    date,
     amount,
     description,
-    transactionId: String(transactionId),
-    fullDescription: [city, state, country].join(", "),
+    transactionId,
+    transactionType,
+    city,
+    state,
+    country,
     isPending,
   });
   return obj;
