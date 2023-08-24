@@ -1,5 +1,5 @@
-/**@typedef {import('./types').TimeUnit} TimeUnit */
-/**@typedef {import('./models/tiller-transaction').Transaction} Transaction */
+/**@typedef {import('./services/categories.js').TimeUnit} TimeUnit */
+/**@typedef {import('./services/tiller-transaction').Transaction} Transaction */
 import dayjs from "dayjs";
 
 /**

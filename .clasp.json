@@ -1,6 +1,5 @@
 {
   "scriptId": "10LB-UF6iLOkpIlZgK9CrEaeuu0novG80kmxYGH5O5mU_ysuPCduqy1Ye",
   "rootDir": "dist",
-  "fileExtension": "gs",
-  "filePushOrder": ["Code.gs"]
+  "fileExtension": "gs"
 }

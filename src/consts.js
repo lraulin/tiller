@@ -18,9 +18,3 @@ export const takeHomePay = Object.freeze({
   WEEKLY: monthly / 4, // 1,212
   YEARLY: monthly * 12, // 58,176
 });
-
-export const directExpress = Object.freeze({
-  ACCOUNT_NAME: "Direct Express",
-  ACCOUNT_NUMBER: "xxxx0947",
-  INSTITUTION: "Comerica",
-});

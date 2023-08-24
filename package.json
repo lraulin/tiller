@@ -2,7 +2,7 @@
   "name": "tiller",
   "version": "1.0.0",
   "description": "",
-  "main": "shell.js",
+  "main": "app.js",
   "type": "module",
   "scripts": {
     "test": "mocha",

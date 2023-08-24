@@ -3,7 +3,7 @@ const GasPlugin = require("gas-webpack-plugin");
 
 module.exports = {
   mode: "production",
-  entry: "./src/shell.js",
+  entry: "./src/app.js",
   output: {
     filename: "Code.gs",
     path: path.resolve(__dirname, "dist"),

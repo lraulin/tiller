@@ -1,97 +1,13 @@
-/**@typedef {import("./types").Category} Category */
-/**@typedef {import("./types").CategoryRow} CategoryRow */
+/**@typedef {import("./services/categories.js").Category} Category */
 /**@typedef {import("./types").DirectExpressRow} DirectExpressRow */
-/**@typedef {import("./types").DirectExpressTransaction} DirectExpressTransaction */
-/**@typedef {import("./types").TimeUnit} TimeUnit */
-/**@typedef {import("./models/tiller-transaction").Transaction} Transaction */
+/**@typedef {import("./services/direct-express.js").DirectExpressTransaction} DirectExpressTransaction */
+/**@typedef {import("./services/tiller-transaction.js").Transaction} Transaction */
+/**@typedef {import("./services/categories.js").TimeUnit} TimeUnit */
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween.js";
-import {
-  ascending,
-  descending,
-  getDateRange,
-  isValidDate,
-  startOf,
-} from "./utils.js";
-import { directExpress } from "./consts.js";
-import { directExpressRowToObj } from "./types.js";
-import { createTransaction } from "./models/tiller-transaction.js";
+import { ascending, getDateRange, isValidDate, startOf } from "./utils.js";
 
 dayjs.extend(isBetween);
-
-/**
- *
- *
- * @param {CategoryRow} r
- * @return {Category}
- */
-export const rowToCategory = (r) => {
-  if (r.length < 4) throw new Error("Invalid category row");
-
-  const [name, group, type, hideFromReports] = r;
-  return {
-    name,
-    group,
-    type,
-    hidden: hideFromReports === "Hidden" ? true : false,
-  };
-};
-
-/**
- *
- *
- * @param {CategoryRow[]} categoryRows
- * @param {any[]} transactionRows
- * @returns {Transaction[]}
- */
-export const rowsToTransactions = (categoryRows, transactionRows) => {
-  const categoryLookup = Object.fromEntries(
-    categoryRows.map(rowToCategory).map((c) => [c.name, c])
-  );
-  return transactionRows.map((r) => {
-    if (r.length < 16) throw new Error("Invalid transaction row");
-    const [
-      ,
-      date,
-      description,
-      category,
-      amount,
-      account,
-      accountNumber,
-      institution,
-      month,
-      week,
-      transactionId,
-      accountId,
-      checkNumber,
-      fullDescription,
-      dateAdded,
-      categorizedDate,
-    ] = r;
-    const type = categoryLookup[category]?.type ?? "Uncategorized";
-    const hidden = categoryLookup[category]?.hidden ?? false;
-
-    return createTransaction({
-      date,
-      description,
-      category,
-      type,
-      hidden,
-      amount,
-      account,
-      accountNumber,
-      institution,
-      month,
-      week,
-      transactionId,
-      accountId,
-      checkNumber,
-      fullDescription,
-      dateAdded,
-      categorizedDate,
-    });
-  });
-};
 
 /**
  *
@@ -173,50 +89,4 @@ export const getSpendingData = ({
     );
     return [date, total];
   });
-};
-
-/**
- *
- * @param {DirectExpressTransaction} directExpressRow
- * @returns {Transaction}
- */
-const directExpressToTiller = ({
-  date,
-  transactionId,
-  description,
-  amount,
-  city,
-  state,
-  country,
-  isPending,
-}) =>
-  createTransaction({
-    date,
-    amount,
-    account: directExpress.ACCOUNT_NAME,
-    institution: directExpress.INSTITUTION,
-    accountNumber: directExpress.ACCOUNT_NUMBER,
-    description: isPending ? "[PENDING] " + description : description,
-    fullDescription: [city, state, country].join(", "),
-    transactionId: String(transactionId),
-  });
-
-/**
- *
- * @param {Transaction[]} transactions
- * @param {DirectExpressRow[]} directExpressRows
- */
-export const getNewTransactionsFromDirectExpress = (
-  transactions,
-  directExpressRows
-) => {
-  const mostRecentId = transactions
-    .filter((t) => t.account === "Direct Express")
-    .map((t) => Number(t.transactionId))
-    .sort(descending)?.[0];
-  const newImports = directExpressRows
-    .map(directExpressRowToObj)
-    .filter((t) => t.transactionId > mostRecentId);
-  const newTillerTransactions = newImports.map(directExpressToTiller);
-  return newTillerTransactions;
 };
