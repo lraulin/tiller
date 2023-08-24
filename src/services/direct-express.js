@@ -56,29 +56,50 @@ function getAsRows() {
   return directExpressTransactions.map((t) => t.toRow());
 }
 
+/**
+ * @typedef {Record<number,DirectExpressTransaction>} IdMap
+ */
+
+/**
+ *
+ * @param {IdMap} accumulator
+ * @param {DirectExpressTransaction} current
+ * @returns {IdMap}
+ */
+const idMapReducer = (accumulator, current) => {
+  if (!accumulator[current.transactionId]) {
+    accumulator[current.transactionId] = current;
+    return accumulator;
+  }
+
+  const copyA = accumulator[current.transactionId];
+  const copyB = current;
+
+  if (copyA.isPending) {
+    accumulator[current.transactionId] = copyB;
+  } else {
+    accumulator[current.transactionId] = copyA;
+  }
+  return accumulator;
+};
+
+/**
+ *
+ * @param {DirectExpressTransaction} a
+ * @param {DirectExpressTransaction} b
+ * @returns {number}
+ */
+const descendingByTransactionId = (a, b) => b.transactionId - a.transactionId;
+
+/**
+ *
+ * @param {DirectExpressTransaction[]} directExpressTransactions
+ * @returns
+ */
 const deDuplicate = (directExpressTransactions) => {
-  let duplicateCount = 0;
-  const transactionsById = directExpressTransactions.reduce((a, c) => {
-    if (!a[c.transactionId]) {
-      a[c.transactionId] = c;
-      return a;
-    }
+  const transactionsById = directExpressTransactions.reduce(idMapReducer, {});
 
-    duplicateCount++;
-    const copyA = a[c.transactionId];
-    const copyB = c;
-
-    if (copyA.pending) {
-      a[c.transactionId] = copyB;
-    } else {
-      a[c.transactionId] = copyA;
-    }
-    return a;
-  }, {});
-
-  return Object.values(transactionsById).sort(
-    (a, b) => b.transactionId - a.transactionId
-  );
+  return Object.values(transactionsById).sort(descendingByTransactionId);
 };
 
 /**
