@@ -53,7 +53,7 @@ export function onOpen() {
     .addItem("Import Direct Express", "importDirectExpress")
     .addItem("Fill My Sheets", "fillCustomSheets")
     .addItem("Sort Transactions", "sortTransactions")
-    .addItem("Sort DirectExpress", "sortDirectExpress")
+    .addItem("Clean Up Direct Express", "cleanUpDirectExpress")
     .addToUi();
 }
 
