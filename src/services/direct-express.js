@@ -41,6 +41,7 @@ export function getDirectExpressTransactions() {
   if (directExpressTransactions.length > 0) {
     return directExpressTransactions;
   }
+  _getDirectExpressTransactionsFromSheet();
   return directExpressTransactions;
 }
 
