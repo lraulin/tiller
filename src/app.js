@@ -8,6 +8,7 @@ import { sheetNames } from "./consts.js";
 import { filterToExpenses, getSpendingData } from "./core.js";
 import { appendToSheet, getSheet, sortSheet } from "./services/sheets.js";
 import * as tiller from "./services/tiller-transaction.js";
+import * as de from "./services/direct-express.js";
 
 /**
  * @typedef {object} SpendingTableParams
@@ -61,13 +62,8 @@ export function sortTransactions() {
   sortSheet({ sheet, column: transactionHeaders.Date, ascending: false });
 }
 
-export function sortDirectExpress() {
-  const sheet = getSheet(sheetNames.DIRECT_EXPRESS);
-  sortSheet({
-    sheet,
-    column: directExpressHeaders.DATE,
-    ascending: false,
-  });
+export function cleanUpDirectExpress() {
+  de.cleanUp();
 }
 
 // Gas plugin needs assignments to "global" to create top-level functions...
@@ -76,4 +72,8 @@ global.onOpen = onOpen;
 global.fillCustomSheets = fillCustomSheets;
 global.importDirectExpress = importDirectExpress;
 global.sortTransactions = sortTransactions;
-global.sortDirectExpress = sortDirectExpress;
+global.cleanUpDirectExpress = cleanUpDirectExpress;
+
+for (const [k, v] of Object.entries(global)) {
+  globalThis[k] = v;
+}

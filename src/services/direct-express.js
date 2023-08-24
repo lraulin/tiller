@@ -45,7 +45,7 @@ export function getDirectExpressTransactions() {
   return directExpressTransactions;
 }
 
-function initDirectExpress() {
+export function cleanUp() {
   directExpressTransactions = getDirectExpressTransactions();
   directExpressTransactions = deDuplicate(directExpressTransactions);
   directExpressTransactions.sort((a, b) => b.transactionId - a.transactionId);
