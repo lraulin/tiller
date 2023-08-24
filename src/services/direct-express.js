@@ -1,5 +1,4 @@
-import { count } from "console";
-import { alert, getRowsFromSheet, getSheet, overwriteSheet } from "./sheets.js";
+import { getRowsFromSheet, getSheet, overwriteSheet } from "./sheets.js";
 import { isValidDate } from "../utils.js";
 import * as tiller from "./tiller-transaction.js";
 
@@ -8,24 +7,24 @@ const ACCOUNT_NAME = "Direct Express";
 const ACCOUNT_NUMBER = "xxxx0947";
 const INSTITUTION = "Comerica";
 
-const headers = Object.freeze({
-  DATE: 1,
-  "TRANSACTION ID": 2,
-  DESCRIPTION: 3,
-  AMOUNT: 4,
-  "TRANSACTION TYPE": 5,
-  CITY: 6,
-  STATE: 7,
-  COUNTRY: 8,
-  1: "DATE",
-  2: "TRANSACTION ID",
-  3: "DESCRIPTION",
-  4: "AMOUNT",
-  5: "TRANSACTION TYPE",
-  6: "CITY",
-  7: "STATE",
-  8: "COUNTRY",
-});
+// const headers = Object.freeze({
+//   DATE: 1,
+//   "TRANSACTION ID": 2,
+//   DESCRIPTION: 3,
+//   AMOUNT: 4,
+//   "TRANSACTION TYPE": 5,
+//   CITY: 6,
+//   STATE: 7,
+//   COUNTRY: 8,
+//   1: "DATE",
+//   2: "TRANSACTION ID",
+//   3: "DESCRIPTION",
+//   4: "AMOUNT",
+//   5: "TRANSACTION TYPE",
+//   6: "CITY",
+//   7: "STATE",
+//   8: "COUNTRY",
+// });
 
 const directExpressSheet = getSheet(SHEET_NAME);
 let directExpressTransactions = /**@type {DirectExpressTransaction[]} */ ([]);

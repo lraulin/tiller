@@ -5,7 +5,7 @@
 import { startOfMonth, startOfWeek } from "../utils.js";
 import { getRowsFromSheet, getSheet, overwriteSheet } from "./sheets.js";
 import { getCategoryLookup } from "./categories.js";
-import * as de from "./direct-express";
+import * as de from "./direct-express.js";
 
 const SHEET_NAME = "Transactions";
 const transactionSheet = getSheet(SHEET_NAME);
