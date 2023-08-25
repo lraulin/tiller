@@ -1,42 +1,12 @@
-/**@typedef {import("./categories.js").Category} Category */
-/**@typedef {import("./direct-express/main.js/index.js").DirectExpressTransaction} DirectExpressTransaction */
-/**@typedef {import("./transactions/main.js/index.js").Transaction} Transaction */
-/**@typedef {import("./categories.js").TimeUnit} TimeUnit */
-import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween.js";
 import { ascending, getDateRange, isValidDate, startOf } from "./utils.js";
 
+import { TimeUnit } from "./categories/types.js";
+import { Transaction } from "./transactions/types.js";
+import dayjs from "dayjs";
+import { getFirstTransactionDate } from "./transactions/main.js";
+import isBetween from "dayjs/plugin/isBetween.js";
+
 dayjs.extend(isBetween);
-
-/**
- *
- * @param {Transaction[]} transactions
- */
-export const filterToExpenses = (transactions) =>
-  transactions.filter((t) => t.hidden === false && t.type === "Expense");
-
-/**
- *
- * @param {Transaction[]} transactions
- * @returns {Date}
- */
-const getFirstTransactionDate = (transactions) => {
-  if (transactions.length === 0) throw new Error("called with empty array");
-  const firstDateTimeStamp = transactions
-    .map((t) => {
-      if (!t.date) throw new Error("Transaction missing date");
-      if (!t.date.getTime) throw new Error("Invalid date in transaction");
-      return t.date.getTime();
-    })
-    .sort(ascending)[0];
-  const firstTransactionDate = new Date(firstDateTimeStamp);
-  if (!isValidDate)
-    throw new Error(
-      "Invalid date; " +
-        JSON.stringify({ firstDateTimeStamp, firstTransactionDate })
-    );
-  return firstTransactionDate;
-};
 
 /**
  *
@@ -69,7 +39,7 @@ export const getSpendingData = ({
   transactions,
   unit,
   lastDate,
-  firstDate = getFirstTransactionDate(transactions),
+  firstDate = getFirstTransactionDate(),
 }) => {
   /**@type {function(Date):Date} */
   const startOfUnit = startOf(unit);
