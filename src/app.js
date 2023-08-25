@@ -1,18 +1,16 @@
-/** */
-
-/**@typedef {import("./categories.js").TimeUnit} TimeUnit */
-/**@typedef {import("./transactions/main.js").Transaction} Transaction*/
-import { sheetNames } from "./consts.js";
-
-import { getSpendingData } from "./core.js";
-import { appendToSheet, getSheet, sortSheet } from "./sheets.js";
 import * as tiller from "./transactions/main.js";
+
+import { appendToSheet, getSheet } from "./sheets/main.js";
+
+import { SheetName } from "./sheets/types.js";
+import { TimeUnit } from "./categories/types.js";
 import { cleanUp } from "./direct-express/global.js";
+import { getSpendingData } from "./core.js";
 
 /**
  * @typedef {object} SpendingTableParams
  * @property {TimeUnit} unit
- * @property {string} sheetName
+ * @property {SheetName} sheetName
  */
 
 /**
@@ -32,9 +30,9 @@ function fillSpendingTable({ unit, sheetName }) {
 function fillSpendingTables() {
   /**@type {SpendingTableParams[]} */
   const params = [
-    { unit: "day", sheetName: sheetNames.DAILY },
-    { unit: "week", sheetName: sheetNames.WEEKLY },
-    { unit: "month", sheetName: sheetNames.MONTHLY },
+    { unit: "day", sheetName: "Daily" },
+    { unit: "week", sheetName: "Weekly" },
+    { unit: "month", sheetName: "Monthly" },
   ];
   params.forEach(fillSpendingTable);
 }
@@ -56,17 +54,12 @@ export function onOpen() {
     .addToUi();
 }
 
-export function sortTransactions() {
-  const sheet = getSheet(sheetNames.TRANSACTIONS);
-  sortSheet({ sheet, column: transactionHeaders.Date, ascending: false });
-}
-
 // Gas plugin needs assignments to "global" to create top-level functions...
 const global = {};
 global.onOpen = onOpen;
 global.fillCustomSheets = fillCustomSheets;
 global.importDirectExpress = importDirectExpress;
-global.sortTransactions = sortTransactions;
+global.sortTransactions = tiller.sortTransactionsSheet;
 global.cleanUpDirectExpress = cleanUp;
 
 // But "global" is no longer available in GAS; globalThis works instead

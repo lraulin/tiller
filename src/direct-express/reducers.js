@@ -1,5 +1,4 @@
-/**@typedef {import("./transformers.js").DirectExpressTransaction} DirectExpressTransaction */
-/** @typedef {Record<number,DirectExpressTransaction>} IdMap */
+import { DirectExpressTransaction, IdMap } from "./types.js";
 
 /**
  *

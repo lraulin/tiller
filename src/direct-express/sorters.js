@@ -1,7 +1,9 @@
+import { DirectExpressTransaction } from "./types.js";
+
 /**
  *
- * @param {import("./main.js").DirectExpressTransaction} a
- * @param {import("./main.js").DirectExpressTransaction} b
+ * @param {DirectExpressTransaction} a
+ * @param {DirectExpressTransaction} b
  * @returns {number}
  */
 export const byTransactionIdDescending = (a, b) =>

@@ -1,6 +1,4 @@
-/**
- * @typedef {'Transactions'|'Categories'|'Direct Express'|'Daily'|'Weekly'|'Monthly'} SheetName
- */
+import { SheetName } from "./types.js";
 
 /**
  * Get values from Google Sheet of specified name.
@@ -24,7 +22,7 @@ export function alert(message) {
 /**
  * Gets Google Sheet by name.
  *
- * @param {string} name
+ * @param {SheetName} name
  * @return {GoogleAppsScript.Spreadsheet.Sheet}
  */
 export function getSheet(name) {

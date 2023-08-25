@@ -15,6 +15,8 @@
     "src/*.js",
     "lib/**/*.js",
     "test/**/*.js",
-    "src/direct-express/main.js"
+    "src/direct-express/main.js",
+    "src/categories/main.js",
+    "src/sheets/main.js"
   ]
 }

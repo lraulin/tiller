@@ -1,31 +1,50 @@
-/**@typedef {import("../categories.js").TimeUnit} TimeUnit */
-/**@typedef {import("../categories.js").CategoryType} CategoryType */
-import { startOfMonth, startOfWeek } from "../utils.js";
-import { getRowsFromSheet, getSheet, overwriteSheet } from "../sheets.js";
-import { getCategoryLookup } from "../categories.js";
+import * as de from "../direct-express/main.js";
+
+import { Transaction, TransactionColumnName } from "./types.js";
+import { ascending, isValidDate } from "../utils.js";
+import {
+  columnNumber,
+  parseNumericTransactionId,
+  rowToTransaction,
+  toRow,
+  toTimeStamp,
+  transactionHeaders,
+} from "./transformers.js";
+import {
+  getRowsFromSheet,
+  getSheet,
+  overwriteSheet,
+  sortSheet,
+} from "../sheets/main.js";
 import {
   institutionIsComerica,
   isNotPending,
   typeIsExpense,
   typeIsIncome,
 } from "./predicates.js";
-import {
-  parseNumericTransactionId,
-  rowToTransaction,
-  toRow,
-} from "./transformers.js";
-import * as de from "../direct-express/main.js";
+
+import { SheetName } from "../sheets/types.js";
 import { directExpressToTransaction } from "../direct-express/transformers.js";
+import { getCategoryLookup } from "../categories/main.js";
 
-const SHEET_NAME = "Transactions";
-const transactionSheet = getSheet(SHEET_NAME);
+/**@type {GoogleAppsScript.Spreadsheet.Sheet} */
+const sheet = getSheet("Transactions");
 
-let transactions = /**@type {Transaction[]} */ ([]);
-let expenses = /**@type {Transaction[]} */ ([]);
-let income = /**@type {Transaction[]} */ ([]);
+/**@type {Transaction[]} */
+let transactions = [];
 
+/**@type {Transaction[]} */
+let expenses = [];
+
+/**@type {Transaction[]} */
+let income = [];
+
+/**
+ *
+ * @returns {Transaction[]}
+ */
 function getTransactionsFromSheet() {
-  const transactionRows = getRowsFromSheet(transactionSheet);
+  const transactionRows = getRowsFromSheet(sheet);
   if (transactionRows.length === 0) throw new Error("No transactions found");
 
   const rowToTransactionWithCategory = rowToTransaction(getCategoryLookup());
@@ -33,6 +52,10 @@ function getTransactionsFromSheet() {
   return transactionRows.map(rowToTransactionWithCategory);
 }
 
+/**
+ *
+ * @returns {Transaction[]}
+ */
 export function getTransactions() {
   if (transactions.length > 0) {
     return transactions;
@@ -42,6 +65,10 @@ export function getTransactions() {
   return transactions;
 }
 
+/**
+ *
+ * @returns {Transaction[]}
+ */
 export function getExpenses() {
   if (expenses.length > 0) {
     return expenses;
@@ -78,7 +105,7 @@ export function writeTransactions() {
   }
 
   const data = transactions.map(toRow);
-  overwriteSheet(transactionSheet, data);
+  overwriteSheet(sheet, data);
 }
 
 function getMostRecentDirectExpressTransactionId() {
@@ -102,68 +129,47 @@ export function importDirectExpress() {
 }
 
 /**
- * Represents an item from the Transaction table.
- * @typedef {object} Transaction
- * @property {Date} date
- * @property {number} amount
- * @property {string} category
- * @property {CategoryType} type
- * @property {boolean} hidden
- * @property {string} account
- * @property {string} institution
- * @property {string} accountNumber
- * @property {string} description
- * @property {string} fullDescription
- * @property {string} transactionId
- * @property {string} accountId
- * @property {string} checkNumber
- * @property {Date} month
- * @property {Date} week
- * @property {Date} dateAdded
- * @property {Date|undefined} categorizedDate
+ *
+ * @returns {Date}
  */
+export function getFirstTransactionDate() {
+  if (transactions.length === 0) throw new Error("called with empty array");
+
+  const firstDateTimeStamp = transactions.map(toTimeStamp).sort(ascending)?.[0];
+  if (!firstDateTimeStamp) throw new Error("firstDateTimeStamp is undefined");
+
+  const firstTransactionDate = new Date(firstDateTimeStamp);
+  if (!isValidDate)
+    throw new Error(
+      "Invalid date; " +
+        JSON.stringify({ firstDateTimeStamp, firstTransactionDate })
+    );
+
+  return firstTransactionDate;
+}
 
 /**
+ * Sorts a Google Sheet containing transactions based on the specified column and order.
  *
+ * @function
+ * @param {Object} [options] - The options object for sorting the transactions.
+ * @param {TransactionColumnName} [options.columnName="Date"] - The name of the column to sort by.
+ * @param {boolean} [options.ascending=false] - Whether to sort the transactions in ascending order.
+ * @example
  *
- * @return {Transaction}
+ * // Sort the transactions by 'Date' in descending order (default settings)
+ * sortTransactionsSheet();
+ *
+ * // Sort the transactions by 'Description' in ascending order
+ * sortTransactionsSheet({ columnName: "Description", ascending: true });
+ *
+ * // Sort the transactions by 'Amount' in descending order
+ * sortTransactionsSheet({ columnName: "Amount" });
  */
-export const createTransaction = ({
-  date = new Date(),
-  amount = 0,
-  category = "",
-  type = /**@type {CategoryType} */ ("Uncategorized"),
-  hidden = false,
-  account = "",
-  institution = "",
-  accountNumber = "",
-  description = "",
-  fullDescription = "",
-  transactionId = "",
-  accountId = "",
-  checkNumber = "",
-  month = startOfMonth(date),
-  week = startOfWeek(date),
-  dateAdded = new Date(),
-  categorizedDate = undefined,
-} = {}) => {
-  return {
-    date,
-    description,
-    category,
-    type,
-    hidden,
-    amount,
-    account,
-    accountNumber,
-    institution,
-    month,
-    week,
-    transactionId,
-    accountId,
-    checkNumber,
-    fullDescription,
-    dateAdded,
-    categorizedDate,
-  };
-};
+export function sortTransactionsSheet({
+  columnName = "Date",
+  ascending = false,
+} = {}) {
+  const column = columnNumber(columnName);
+  sortSheet({ sheet, column, ascending });
+}

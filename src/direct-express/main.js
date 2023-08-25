@@ -1,8 +1,9 @@
-/**@typedef {import("../transactions/main.js").Transaction} Transaction */
-import { getRowsFromSheet, getSheet, overwriteSheet } from "../sheets.js";
-import * as tiller from "../transactions/main.js";
-import { byTransactionIdDescending } from "./sorters.js";
 import { deDuplicate, directExpressToRow } from "./transformers.js";
+import { getRowsFromSheet, getSheet, overwriteSheet } from "../sheets/main.js";
+
+import { DirectExpressTransaction } from "./types.js";
+import { byTransactionIdDescending } from "./sorters.js";
+import { createTransaction } from "../transactions/transformers.js";
 
 const SHEET_NAME = "DirectExpress";
 const ACCOUNT_NAME = "Direct Express";
@@ -28,8 +29,11 @@ const headers = Object.freeze({
   7: "COUNTRY",
 });
 
-const directExpressSheet = getSheet(SHEET_NAME);
-let directExpressTransactions = /**@type {DirectExpressTransaction[]} */ ([]);
+/**@type {GoogleAppsScript.Spreadsheet.Sheet} */
+const directExpressSheet = getSheet("DirectExpress");
+
+/**@type {DirectExpressTransaction[]} */
+let directExpressTransactions = [];
 
 function _getDirectExpressTransactionsFromSheet() {
   const directExpressRows = getRowsFromSheet(directExpressSheet);
@@ -105,35 +109,6 @@ export function writeToDirectExpressSheet() {
  */
 const descendingByTransactionId = (a, b) => b.transactionId - a.transactionId;
 
-/**
- * @typedef {Object} DEData
- * @property {Date|"Pending"} date
- * @property {number} transactionId
- * @property {string} description
- * @property {number} amount
- * @property {string} transactionType
- * @property {string} city
- * @property {string} state
- * @property {string} country
- * @property {boolean} isPending
- */
-
-/**
- * @typedef {Object} DirectExpressTransaction
- * @property {Date?} date
- * @property {number} transactionId
- * @property {string} description
- * @property {number} amount
- * @property {string} transactionType
- * @property {string} city
- * @property {string} state
- * @property {string} country
- * @property {boolean} isPending
- * @property {function(DEData):DirectExpressTransaction} init
- * @property {function():any[]} toRow
- * @property {function():Transaction} toTiller
- */
-
 /**@type {DirectExpressTransaction} */
 const directExpressTransactionOLOO = {
   date: null,
@@ -179,7 +154,7 @@ const directExpressTransactionOLOO = {
     return row;
   },
   toTiller() {
-    return tiller.createTransaction({
+    return createTransaction({
       date: this.date ? this.date : new Date(),
       amount: this.amount,
       account: ACCOUNT_NAME,

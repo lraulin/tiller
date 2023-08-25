@@ -1,5 +1,5 @@
-/**@typedef {import('./main').Transaction} Transaction */
-/**@typedef {import('./main').CategoryType} CategoryType */
+import { CategoryType } from "../categories/types.js";
+import { Transaction } from "./types.js";
 
 /**
  * @param {CategoryType} type
