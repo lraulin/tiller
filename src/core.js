@@ -1,7 +1,7 @@
-/**@typedef {import("./services/categories.js").Category} Category */
-/**@typedef {import("./services/direct-express.js").DirectExpressTransaction} DirectExpressTransaction */
-/**@typedef {import("./services/tiller-transaction.js").Transaction} Transaction */
-/**@typedef {import("./services/categories.js").TimeUnit} TimeUnit */
+/**@typedef {import("./categories.js").Category} Category */
+/**@typedef {import("./direct-express/main.js/index.js").DirectExpressTransaction} DirectExpressTransaction */
+/**@typedef {import("./transactions/main.js/index.js").Transaction} Transaction */
+/**@typedef {import("./categories.js").TimeUnit} TimeUnit */
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween.js";
 import { ascending, getDateRange, isValidDate, startOf } from "./utils.js";

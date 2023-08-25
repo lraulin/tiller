@@ -1,6 +1,8 @@
-/**@typedef {import("./tiller-transaction.js").Transaction} Transaction */
-import { getRowsFromSheet, getSheet, overwriteSheet } from "./sheets.js";
-import * as tiller from "./tiller-transaction.js";
+/**@typedef {import("../transactions/main.js").Transaction} Transaction */
+import { getRowsFromSheet, getSheet, overwriteSheet } from "../sheets.js";
+import * as tiller from "../transactions/main.js";
+import { byTransactionIdDescending } from "./sorters.js";
+import { deDuplicate, directExpressToRow } from "./transformers.js";
 
 const SHEET_NAME = "DirectExpress";
 const ACCOUNT_NAME = "Direct Express";
@@ -59,41 +61,41 @@ export function getDirectExpressTransactions({ afterTransId = 0 } = {}) {
   return directExpressTransactions;
 }
 
-export function cleanUp() {
-  directExpressTransactions = getDirectExpressTransactions();
-  directExpressTransactions = deDuplicate(directExpressTransactions);
-  directExpressTransactions.sort((a, b) => b.transactionId - a.transactionId);
-  overwriteSheet(directExpressSheet, getAsRows());
-}
-
-function getAsRows() {
-  return directExpressTransactions.map((t) => t.toRow());
-}
-
 /**
- * @typedef {Record<number,DirectExpressTransaction>} IdMap
+ *
+ * @param {DirectExpressTransaction[]} transactions
  */
+export function setDirectExpressTransacionts(transactions) {
+  directExpressTransactions = [...transactions];
+}
 
 /**
  *
- * @param {IdMap} accumulator
- * @param {DirectExpressTransaction} current
- * @returns {IdMap}
+ * @returns {any[][]}
  */
-const idMapReducer = (accumulator, current) => {
-  if (!accumulator[current.transactionId]) {
-    accumulator[current.transactionId] = current;
-    return accumulator;
+export function getAsRows() {
+  return directExpressTransactions.map(directExpressToRow);
+}
+
+export function deDuplicateDirectExpressTransactions() {
+  if (!directExpressTransactions.length) {
+    getDirectExpressTransactions();
   }
 
-  const copyA = accumulator[current.transactionId];
-  const copyB = current;
+  directExpressTransactions = deDuplicate(directExpressTransactions);
+}
 
-  if (copyA.isPending) {
-    accumulator[current.transactionId] = copyB;
+export function sortDirectExpressTransactions() {
+  directExpressTransactions.sort(byTransactionIdDescending);
+}
+
+export function writeToDirectExpressSheet() {
+  if (!directExpressTransactions.length) {
+    throw new Error("Attempting to overwrite sheet with empty data!");
   }
-  return accumulator;
-};
+
+  overwriteSheet(directExpressSheet, getAsRows());
+}
 
 /**
  *
@@ -102,17 +104,6 @@ const idMapReducer = (accumulator, current) => {
  * @returns {number}
  */
 const descendingByTransactionId = (a, b) => b.transactionId - a.transactionId;
-
-/**
- *
- * @param {DirectExpressTransaction[]} directExpressTransactions
- * @returns
- */
-const deDuplicate = (directExpressTransactions) => {
-  const transactionsById = directExpressTransactions.reduce(idMapReducer, {});
-
-  return Object.values(transactionsById).sort(descendingByTransactionId);
-};
 
 /**
  * @typedef {Object} DEData
