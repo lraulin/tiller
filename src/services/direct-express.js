@@ -1,5 +1,5 @@
+/**@typedef {import("./tiller-transaction.js").Transaction} Transaction */
 import { getRowsFromSheet, getSheet, overwriteSheet } from "./sheets.js";
-import { isValidDate } from "../utils.js";
 import * as tiller from "./tiller-transaction.js";
 
 const SHEET_NAME = "DirectExpress";
@@ -37,11 +37,25 @@ function _getDirectExpressTransactionsFromSheet() {
   directExpressTransactions = directExpressRows.map(createFromRow);
 }
 
-export function getDirectExpressTransactions() {
+/**
+ *
+ * Retrieves transactions from cache if available, otherwise populates cache
+ * from spreadsheet, then returns transactions. Optionally, can filter be
+ * applied to returned data.
+ *
+ * @returns {DirectExpressTransaction[]}
+ */
+export function getDirectExpressTransactions({ afterTransId = 0 } = {}) {
   if (directExpressTransactions.length > 0) {
     return directExpressTransactions;
   }
   _getDirectExpressTransactionsFromSheet();
+
+  if (afterTransId) {
+    return directExpressTransactions.filter(
+      (t) => t.transactionId > afterTransId
+    );
+  }
   return directExpressTransactions;
 }
 
@@ -102,7 +116,7 @@ const deDuplicate = (directExpressTransactions) => {
 
 /**
  * @typedef {Object} DEData
- * @property {Date?} date
+ * @property {Date|"Pending"} date
  * @property {number} transactionId
  * @property {string} description
  * @property {number} amount
@@ -126,9 +140,20 @@ const deDuplicate = (directExpressTransactions) => {
  * @property {boolean} isPending
  * @property {function(DEData):DirectExpressTransaction} init
  * @property {function():any[]} toRow
+ * @property {function():Transaction} toTiller
  */
 
+/**@type {DirectExpressTransaction} */
 const directExpressTransactionOLOO = {
+  date: null,
+  transactionId: 0,
+  description: "",
+  amount: 0,
+  transactionType: "",
+  city: "",
+  state: "",
+  country: "",
+  isPending: false,
   init({
     date,
     transactionId,
@@ -139,7 +164,7 @@ const directExpressTransactionOLOO = {
     state,
     country,
   }) {
-    this.date = isValidDate(date) ? date : null;
+    this.date = date === "Pending" ? null : date;
     this.transactionId = transactionId;
     this.description = description;
     this.amount = amount;

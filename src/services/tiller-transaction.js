@@ -116,8 +116,26 @@ export function writeTransactions() {
   overwriteSheet(transactionSheet, data);
 }
 
+function getMostRecentDirectExpressTransactionId() {
+  const transactions = getTransactions().filter(
+    (t) => t.institution === "Direct Express"
+  );
+  if (transactions.length === 0) return 0;
+  return Math.max(...transactions.map((t) => Number.parseInt(t.transactionId)));
+}
+
 export function importDirectExpress() {
-  const directExpressImports = de.getDirectExpressTransactions();
+  transactions = getTransactions().filter(
+    (t) => !t.description.includes("[Pending]")
+  );
+  const afterTransId = getMostRecentDirectExpressTransactionId();
+  const directExpressImports = de.getDirectExpressTransactions({
+    afterTransId,
+  });
+  transactions = [
+    ...transactions,
+    ...directExpressImports.map((d) => d.toTiller()),
+  ];
 }
 
 /**

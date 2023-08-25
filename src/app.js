@@ -4,7 +4,7 @@
 /**@typedef {import("./services/tiller-transaction").Transaction} Transaction*/
 import { sheetNames } from "./consts.js";
 
-import { filterToExpenses, getSpendingData } from "./core.js";
+import { getSpendingData } from "./core.js";
 import { appendToSheet, getSheet, sortSheet } from "./services/sheets.js";
 import * as tiller from "./services/tiller-transaction.js";
 import * as de from "./services/direct-express.js";
@@ -73,6 +73,8 @@ global.importDirectExpress = importDirectExpress;
 global.sortTransactions = sortTransactions;
 global.cleanUpDirectExpress = cleanUpDirectExpress;
 
+// But "global" is no longer available in GAS; globalThis works instead
+// https://developers.google.com/apps-script/guides/v8-runtime/migration#global
 for (const [k, v] of Object.entries(global)) {
   globalThis[k] = v;
 }
