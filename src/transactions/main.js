@@ -57,11 +57,14 @@ function getTransactionsFromSheet() {
  * @returns {Transaction[]}
  */
 export function getTransactions() {
-  if (transactions.length > 0) {
+  if (transactions.length) {
     return transactions;
   }
 
   transactions = getTransactionsFromSheet();
+  if (!transactions.length) {
+    throw new Error("Unable to retrieve transactions from sheet");
+  }
   return transactions;
 }
 
@@ -126,6 +129,7 @@ export function importDirectExpress() {
     ...transactions,
     ...directExpressImports.map(directExpressToTransaction),
   ];
+  overwriteSheet(sheet, transactions.map(toRow));
 }
 
 /**

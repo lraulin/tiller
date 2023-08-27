@@ -37,11 +37,9 @@ function fillSpendingTables() {
   params.forEach(fillSpendingTable);
 }
 
-export function importDirectExpress() {}
-
 export function fillCustomSheets() {
   fillSpendingTables();
-  importDirectExpress();
+  tiller.importDirectExpress();
 }
 
 export function onOpen() {
@@ -58,7 +56,7 @@ export function onOpen() {
 const global = {};
 global.onOpen = onOpen;
 global.fillCustomSheets = fillCustomSheets;
-global.importDirectExpress = importDirectExpress;
+global.importDirectExpress = tiller.importDirectExpress;
 global.sortTransactions = tiller.sortTransactionsSheet;
 global.cleanUpDirectExpress = cleanUp;
 
