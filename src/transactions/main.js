@@ -3,6 +3,13 @@ import * as de from "../direct-express/main.js";
 import { Transaction, TransactionColumnName } from "./types.js";
 import { ascending, isValidDate } from "../utils.js";
 import {
+  backup,
+  getRowsFromSheet,
+  getSheet,
+  overwriteSheet,
+  sortSheet,
+} from "../sheets/main.js";
+import {
   columnNumber,
   parseNumericTransactionId,
   rowToTransaction,
@@ -11,19 +18,12 @@ import {
   transactionHeaders,
 } from "./transformers.js";
 import {
-  getRowsFromSheet,
-  getSheet,
-  overwriteSheet,
-  sortSheet,
-} from "../sheets/main.js";
-import {
   institutionIsComerica,
   isNotPending,
   typeIsExpense,
   typeIsIncome,
 } from "./predicates.js";
 
-import { SheetName } from "../sheets/types.js";
 import { directExpressToTransaction } from "../direct-express/transformers.js";
 import { getCategoryLookup } from "../categories/main.js";
 
@@ -120,6 +120,8 @@ function getMostRecentDirectExpressTransactionId() {
 }
 
 export function importDirectExpress() {
+  backup("Transactions");
+
   transactions = getTransactions().filter(isNotPending);
   const afterTransId = getMostRecentDirectExpressTransactionId();
   const directExpressImports = de.getDirectExpressTransactions({

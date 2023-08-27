@@ -74,3 +74,15 @@ export function sortSheet({ sheet, column, ascending = true }) {
 export function getDataRangeWithoutHeader(sheet) {
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn());
 }
+
+/**
+ *
+ * @param {SheetName} sheetName
+ * @param {string=} postfix
+ */
+export function backup(sheetName, postfix = "_Backup") {
+  const workBook = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = getSheet(sheetName);
+
+  sheet.copyTo(workBook).setName(sheetName + postfix);
+}
