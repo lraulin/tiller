@@ -132,3 +132,6 @@ dist
 # Appscript/Clasp
 src/.clasp.json
 src/appsscript.json
+
+# Secrets
+src/.secrets.js
