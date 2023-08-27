@@ -1,6 +1,11 @@
 import * as tiller from "./transactions/main.js";
 
-import { appendToSheet, getSheet } from "./sheets/main.js";
+import {
+  appendToSheet,
+  backup,
+  getSheet,
+  restoreBackup,
+} from "./sheets/main.js";
 
 import { SheetName } from "./sheets/types.js";
 import { TimeUnit } from "./categories/types.js";
@@ -49,6 +54,8 @@ export function onOpen() {
     .addItem("Fill My Sheets", "fillCustomSheets")
     .addItem("Sort Transactions", "sortTransactions")
     .addItem("Clean Up Direct Express", "cleanUpDirectExpress")
+    .addItem("Backup Transactions", "backupTransactionsSheet")
+    .addItem("Restore Transactions", "restoreTransactionsSheet")
     .addToUi();
 }
 
@@ -59,6 +66,8 @@ global.fillCustomSheets = fillCustomSheets;
 global.importDirectExpress = tiller.importDirectExpress;
 global.sortTransactions = tiller.sortTransactionsSheet;
 global.cleanUpDirectExpress = cleanUp;
+global.backupTransactionsSheet = tiller.backupTransactionsSheet;
+global.restoreTransactionsSheet = tiller.restoreTransactionsSheet;
 
 // But "global" is no longer available in GAS; globalThis works instead
 // https://developers.google.com/apps-script/guides/v8-runtime/migration#global

@@ -1,5 +1,14 @@
 import { SheetName } from "./types.js";
 
+const BACKUP_POSTFIX = "_Backup";
+
+/**
+ *
+ * @param {SheetName} name
+ * @returns
+ */
+const getBackupName = (name) => name + BACKUP_POSTFIX;
+
 /**
  * Get values from Google Sheet of specified name.
  *
@@ -78,11 +87,29 @@ export function getDataRangeWithoutHeader(sheet) {
 /**
  *
  * @param {SheetName} sheetName
- * @param {string=} postfix
  */
-export function backup(sheetName, postfix = "_Backup") {
-  const workBook = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = getSheet(sheetName);
+export function backup(sheetName) {
+  return function () {
+    const workBook = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = getSheet(sheetName);
 
-  sheet.copyTo(workBook).setName(sheetName + postfix);
+    sheet.copyTo(workBook).setName(getBackupName(sheetName));
+  };
+}
+
+/**
+ *
+ * @param {SheetName} baseSheetName
+ */
+export function restoreBackup(baseSheetName) {
+  return function () {
+    const backupName = getBackupName(baseSheetName);
+    const workBook = SpreadsheetApp.getActiveSpreadsheet();
+    const backupSheet =
+      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(backupName);
+    if (!backupSheet)
+      throw new Error(`Unable to retrieve '${backupName}' sheet`);
+    backupSheet.copyTo(workBook).setName(baseSheetName);
+    workBook.deleteSheet(backupSheet);
+  };
 }

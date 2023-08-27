@@ -24,11 +24,15 @@ import {
   typeIsIncome,
 } from "./predicates.js";
 
+import { SheetName } from "../sheets/types.js";
 import { directExpressToTransaction } from "../direct-express/transformers.js";
 import { getCategoryLookup } from "../categories/main.js";
 
+/**@type {SheetName} */
+const SHEET_NAME = "Transactions";
+
 /**@type {GoogleAppsScript.Spreadsheet.Sheet} */
-const sheet = getSheet("Transactions");
+const sheet = getSheet(SHEET_NAME);
 
 /**@type {Transaction[]} */
 let transactions = [];
@@ -38,6 +42,9 @@ let expenses = [];
 
 /**@type {Transaction[]} */
 let income = [];
+
+export const backupTransactionsSheet = backup(SHEET_NAME);
+export const restoreTransactionsSheet = backup(SHEET_NAME);
 
 /**
  *
@@ -120,7 +127,7 @@ function getMostRecentDirectExpressTransactionId() {
 }
 
 export function importDirectExpress() {
-  backup("Transactions");
+  backup(SHEET_NAME);
 
   transactions = getTransactions().filter(isNotPending);
   const afterTransId = getMostRecentDirectExpressTransactionId();
