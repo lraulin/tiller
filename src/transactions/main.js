@@ -24,11 +24,10 @@ import {
   typeIsIncome,
 } from "./predicates.js";
 
-import { SheetName } from "../sheets/types.js";
 import { directExpressToTransaction } from "../direct-express/transformers.js";
 import { getCategoryLookup } from "../categories/main.js";
 
-/**@type {SheetName} */
+/**@type {string} */
 const SHEET_NAME = "Transactions";
 
 /**@type {GoogleAppsScript.Spreadsheet.Sheet} */

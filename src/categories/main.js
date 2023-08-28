@@ -1,11 +1,9 @@
 import { Category, CategoryLookup } from "./types.js";
 import { getRowsFromSheet, getSheet } from "../sheets/main.js";
 
-import { SheetName } from "../sheets/types.js";
 import { categoryLookupReducer } from "./reducers.js";
 import { rowToCategory } from "./transformers.js";
 
-/**@type {SheetName} */
 const SHEET_NAME = "Categories";
 
 /**@type {GoogleAppsScript.Spreadsheet.Sheet} */

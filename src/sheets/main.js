@@ -1,13 +1,40 @@
-import { SheetName } from "./types.js";
+import { BACKUP_SPREADSHEET_ID } from "../.secrets.js";
 
-const BACKUP_POSTFIX = "_Backup";
+export const WORKBOOK_NAME = "Tiller Foundation Template";
+const BACKUP_POSTFIX = "Backup";
 
 /**
  *
- * @param {SheetName} name
+ * @param {string} sheetName
+ * @param {string} postfix
+ * @param {number} number
  * @returns
  */
-const getBackupName = (name) => name + BACKUP_POSTFIX;
+const getBackupName = (
+  sheetName,
+  number,
+  postfix = BACKUP_POSTFIX,
+  separator = "_"
+) => [sheetName, postfix, number].join(separator);
+
+/**@type {string[]} */
+let sheetNames = [];
+
+/**
+ *
+ */
+function getSheetNames(forceUpdate = false) {
+  if (sheetNames.length && !forceUpdate) {
+    return sheetNames;
+  }
+
+  const sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
+  if (!sheets.length) {
+    throw new Error("No sheets found");
+  }
+
+  sheetNames = sheets.map((sheet) => sheet.getName());
+}
 
 /**
  * Get values from Google Sheet of specified name.
@@ -31,7 +58,7 @@ export function alert(message) {
 /**
  * Gets Google Sheet by name.
  *
- * @param {SheetName} name
+ * @param {string} name
  * @return {GoogleAppsScript.Spreadsheet.Sheet}
  */
 export function getSheet(name) {
@@ -84,32 +111,71 @@ export function getDataRangeWithoutHeader(sheet) {
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn());
 }
 
+const getHighestBackupNumber = (sheetNames, baseName) => {
+  if (!sheetNames.length) throw new Error("No sheet names found");
+
+  const backupNumbers = sheetNames
+    .filter((n) => n.includes(baseName))
+    .map((n) => {
+      const match = n.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    });
+  return backupNumbers.length ? Math.max(...backupNumbers) : 0;
+};
+
 /**
  *
- * @param {SheetName} sheetName
+ * @param {string} sheetName
  */
 export function backup(sheetName) {
   return function () {
     const workBook = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = getSheet(sheetName);
+    getSheetNames(true);
+    const number = getHighestBackupNumber(sheetNames, sheetName) + 1;
 
-    sheet.copyTo(workBook).setName(getBackupName(sheetName));
+    sheet.copyTo(workBook).setName(getBackupName(sheetName, number));
   };
 }
 
 /**
  *
- * @param {SheetName} baseSheetName
+ * @param {string} baseSheetName
  */
 export function restoreBackup(baseSheetName) {
   return function () {
-    const backupName = getBackupName(baseSheetName);
-    const workBook = SpreadsheetApp.getActiveSpreadsheet();
+    const backupNumber = getHighestBackupNumber(sheetNames, baseSheetName);
+    const originalSheet = getSheet(baseSheetName);
+    const backupName = getBackupName(baseSheetName, backupNumber);
     const backupSheet =
       SpreadsheetApp.getActiveSpreadsheet().getSheetByName(backupName);
     if (!backupSheet)
       throw new Error(`Unable to retrieve '${backupName}' sheet`);
+
+    backup(baseSheetName);
+
+    const workBook = SpreadsheetApp.getActiveSpreadsheet();
+    workBook.deleteSheet(originalSheet);
     backupSheet.copyTo(workBook).setName(baseSheetName);
     workBook.deleteSheet(backupSheet);
   };
 }
+
+export function clearAllBackups() {
+  const workBook = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = workBook.getSheets();
+  const backups = sheets.filter((s) => s.getName().includes(BACKUP_POSTFIX));
+  backups.forEach((b) => workBook.deleteSheet(b));
+}
+
+// function backupInOtherSpreadsheet() {
+//   var source = SpreadsheetApp.getActiveSpreadsheet();
+//   var sheet = source.getSheets()[0];
+
+//   var destination = SpreadsheetApp.openById(BACKUP_SPREADSHEET_ID);
+//   sheet.copyTo(destination);
+// }
+
+(function init() {
+  getSheetNames();
+})();
