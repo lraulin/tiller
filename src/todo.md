@@ -1,3 +1,15 @@
 - other ways to import
   - grab csv from email?
   - automatically find spreadsheet in drive?
+
+# Committed
+
+-
+
+# Doing
+
+-
+
+# Done
+
+-
