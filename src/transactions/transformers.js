@@ -156,44 +156,49 @@ export const createTransaction = ({
   categorizedDate,
 });
 
-export const transactionHeaders = Object.freeze({
-  0: "",
-  1: "Date",
-  2: "Description",
-  3: "Category",
-  4: "Amount",
-  5: "Account",
-  6: "Account #",
-  7: "Institution",
-  8: "Month",
-  9: "Week",
-  10: "Transaction ID",
-  11: "Account ID",
-  12: "Check Number",
-  13: "Full Description",
-  14: "Date Added",
-  15: "Categorized Date",
-  "": 0,
-  Date: 1,
-  Description: 2,
-  Category: 3,
-  Amount: 4,
-  Account: 5,
-  "Account #": 6,
-  Institution: 7,
-  Month: 8,
-  Week: 9,
-  "Transaction ID": 10,
-  "Account ID": 11,
-  "Check Number": 12,
-  "Full Description": 13,
-  "Date Added": 14,
-  "Categorized Date": 15,
+// export const transactionHeader = Object.freeze({
+//   0: "",
+//   1: "Date",
+//   2: "Description",
+//   3: "Category",
+//   4: "Amount",
+//   5: "Account",
+//   6: "Account #",
+//   7: "Institution",
+//   8: "Month",
+//   9: "Week",
+//   10: "Transaction ID",
+//   11: "Account ID",
+//   12: "Check Number",
+//   13: "Full Description",
+//   14: "Date Added",
+//   15: "Categorized Date",
+// });
+
+export const transactionColumnNumber = Object.freeze({
+  "": 1,
+  Date: 2,
+  Description: 3,
+  Category: 4,
+  Amount: 5,
+  Account: 6,
+  "Account #": 7,
+  Institution: 8,
+  Month: 9,
+  Week: 10,
+  "Transaction ID": 11,
+  "Account ID": 12,
+  "Check Number": 13,
+  "Full Description": 14,
+  "Date Added": 15,
+  "Categorized Date": 16,
 });
 
 /**
+ * Returns the non-zero indexed column number for the specified column name.
  *
- * @param {TransactionColumnName} c
+ * @param {string} columnName
  * @returns {number}
  */
-export const columnNumber = (c) => transactionHeaders[c] + 1;
+export const getTransactionColumnNumber = (columnName) =>
+  transactionColumnNumber[columnName];

@@ -10,12 +10,11 @@ import {
   sortSheet,
 } from "../sheets/main.js";
 import {
-  columnNumber,
+  getTransactionColumnNumber,
   parseNumericTransactionId,
   rowToTransaction,
   toRow,
   toTimeStamp,
-  transactionHeaders,
 } from "./transformers.js";
 import {
   institutionIsComerica,
@@ -138,6 +137,7 @@ export function importDirectExpress() {
     ...directExpressImports.map(directExpressToTransaction),
   ];
   overwriteSheet(sheet, transactions.map(toRow));
+  sortTransactionsSheet();
 }
 
 /**
@@ -182,6 +182,6 @@ export function sortTransactionsSheet({
   columnName = "Date",
   ascending = false,
 } = {}) {
-  const column = columnNumber(columnName);
+  const column = getTransactionColumnNumber(columnName);
   sortSheet({ sheet, column, ascending });
 }

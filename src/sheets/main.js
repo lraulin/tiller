@@ -1,5 +1,3 @@
-import { BACKUP_SPREADSHEET_ID } from "../.secrets.js";
-
 export const WORKBOOK_NAME = "Tiller Foundation Template";
 const BACKUP_POSTFIX = "Backup";
 
@@ -16,6 +14,22 @@ const getBackupName = (
   postfix = BACKUP_POSTFIX,
   separator = "_"
 ) => [sheetName, postfix, number].join(separator);
+
+/**
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @returns {any[]}
+ */
+export const getFirstRow = (sheet) =>
+  sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+/**
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @returns
+ */
+export const getHeaderNames = (sheet) =>
+  getFirstRow(sheet).map((cell) => cell.toString());
 
 /**@type {string[]} */
 let sheetNames = [];
@@ -73,9 +87,18 @@ export function getSheet(name) {
  * @param {any[][]} data
  */
 export function appendToSheet(sheet, data) {
-  if (!data.length) console.log("No data to append!");
+  if (!data.length) Logger.log("No data to append!");
   const lastRow = sheet.getLastRow();
   sheet.getRange(lastRow + 1, 1, data.length, data[0].length).setValues(data);
+}
+
+/**
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ */
+export function clearDataKeepHeaders(sheet) {
+  const dataRange = getDataRangeWithoutHeaders(sheet);
+  dataRange.clearContent();
 }
 
 /**
@@ -84,9 +107,8 @@ export function appendToSheet(sheet, data) {
  * @param {any[][]} data
  */
 export function overwriteSheet(sheet, data) {
-  const [headers] = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues();
-  sheet.clearContents();
-  appendToSheet(sheet, [headers, ...data]);
+  clearDataKeepHeaders(sheet);
+  appendToSheet(sheet, data);
 }
 
 /**
@@ -97,7 +119,7 @@ export function overwriteSheet(sheet, data) {
  * @param {boolean} param0.ascending
  */
 export function sortSheet({ sheet, column, ascending = true }) {
-  const range = getDataRangeWithoutHeader(sheet);
+  const range = getDataRangeWithoutHeaders(sheet);
   range.sort({ column, ascending });
 }
 
@@ -107,7 +129,7 @@ export function sortSheet({ sheet, column, ascending = true }) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @returns {GoogleAppsScript.Spreadsheet.Range}
  */
-export function getDataRangeWithoutHeader(sheet) {
+export function getDataRangeWithoutHeaders(sheet) {
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn());
 }
 
