@@ -186,7 +186,9 @@ export function restoreBackup(baseSheetName) {
 export function clearAllBackups() {
   const workBook = SpreadsheetApp.getActiveSpreadsheet();
   const sheets = workBook.getSheets();
-  const backups = sheets.filter((s) => s.getName().includes(BACKUP_POSTFIX));
+  const backups = sheets.filter(
+    (s) => s.getName().includes(BACKUP_POSTFIX) || s.getName().includes("Copy")
+  );
   backups.forEach((b) => workBook.deleteSheet(b));
 }
 
