@@ -7,7 +7,7 @@
 
 # Committed
 
--
+- Preserve category on pending transactions when importing Direct Express
 
 # Doing
 
