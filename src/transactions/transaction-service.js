@@ -70,6 +70,10 @@ class TransactionsService {
     sheets.overwrite(this.#sheet, data);
   }
 
+  getById(id) {
+    return this.#transactions.find((t) => t.transactionId === id);
+  }
+
   /**
    * Creates a copy of the sheet appendded with "_BACKUP_{#}"
    */
@@ -100,6 +104,22 @@ class TransactionsService {
       ...this.#transactions,
       ...directExpressImports.map((d) => new Transaction(d)),
     ];
+
+    // Preserve category of pending transactions
+    pendingTransactions.forEach((t) => {
+      const transaction = this.getById(t.transactionId);
+
+      if (transaction === undefined) {
+        Logger.log(
+          `Transaction ${t.transactionId} not found in import; keeping old version`
+        );
+        this.#transactions.push(t);
+        return;
+      }
+
+      transaction.category = t.category;
+    });
+
     this.sortByDate();
     this.saveData();
   }
