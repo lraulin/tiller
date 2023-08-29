@@ -37,7 +37,7 @@ let sheetNames = [];
 /**
  *
  */
-function getSheetNames(forceUpdate = false) {
+function getNames(forceUpdate = false) {
   if (sheetNames.length && !forceUpdate) {
     return sheetNames;
   }
@@ -56,7 +56,7 @@ function getSheetNames(forceUpdate = false) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @returns {any[][]}
  */
-export function getRowsFromSheet(sheet) {
+export function getRows(sheet) {
   const [, ...rows] = sheet.getDataRange().getValues();
   return rows;
 }
@@ -75,7 +75,7 @@ export function alert(message) {
  * @param {string} name
  * @return {GoogleAppsScript.Spreadsheet.Sheet}
  */
-export function getSheet(name) {
+export function get(name) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
   if (!sheet) throw new Error(`Unable to retrieve '${name}' sheet`);
   return sheet;
@@ -86,7 +86,7 @@ export function getSheet(name) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @param {any[][]} data
  */
-export function appendToSheet(sheet, data) {
+export function append(sheet, data) {
   if (!data.length) Logger.log("No data to append!");
   const lastRow = sheet.getLastRow();
   sheet.getRange(lastRow + 1, 1, data.length, data[0].length).setValues(data);
@@ -106,9 +106,9 @@ export function clearDataKeepHeaders(sheet) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @param {any[][]} data
  */
-export function overwriteSheet(sheet, data) {
+export function overwrite(sheet, data) {
   clearDataKeepHeaders(sheet);
-  appendToSheet(sheet, data);
+  append(sheet, data);
 }
 
 /**
@@ -118,7 +118,7 @@ export function overwriteSheet(sheet, data) {
  * @param {number} param0.column
  * @param {boolean} param0.ascending
  */
-export function sortSheet({ sheet, column, ascending = true }) {
+export function sort({ sheet, column, ascending = true }) {
   const range = getDataRangeWithoutHeaders(sheet);
   range.sort({ column, ascending });
 }
@@ -152,8 +152,8 @@ const getHighestBackupNumber = (sheetNames, baseName) => {
 export function backup(sheetName) {
   return function () {
     const workBook = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = getSheet(sheetName);
-    getSheetNames(true);
+    const sheet = get(sheetName);
+    getNames(true);
     const number = getHighestBackupNumber(sheetNames, sheetName) + 1;
 
     sheet.copyTo(workBook).setName(getBackupName(sheetName, number));
@@ -167,7 +167,7 @@ export function backup(sheetName) {
 export function restoreBackup(baseSheetName) {
   return function () {
     const backupNumber = getHighestBackupNumber(sheetNames, baseSheetName);
-    const originalSheet = getSheet(baseSheetName);
+    const originalSheet = get(baseSheetName);
     const backupName = getBackupName(baseSheetName, backupNumber);
     const backupSheet =
       SpreadsheetApp.getActiveSpreadsheet().getSheetByName(backupName);
@@ -201,5 +201,5 @@ export function clearAllBackups() {
 // }
 
 (function init() {
-  getSheetNames();
+  getNames();
 })();

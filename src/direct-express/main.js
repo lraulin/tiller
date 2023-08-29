@@ -1,5 +1,5 @@
 import { deDuplicate, directExpressToRow } from "./transformers.js";
-import { getRowsFromSheet, getSheet, overwriteSheet } from "../sheets/main.js";
+import { get, getRows, overwrite } from "../sheets/main.js";
 
 import { DirectExpressTransaction } from "./types.js";
 import { byTransactionIdDescending } from "./sorters.js";
@@ -32,13 +32,13 @@ const headers = Object.freeze({
 });
 
 /**@type {GoogleAppsScript.Spreadsheet.Sheet} */
-const directExpressSheet = getSheet("DirectExpress");
+const directExpressSheet = get("DirectExpress");
 
 /**@type {DirectExpressTransaction[]} */
 let directExpressTransactions = [];
 
 function _getDirectExpressTransactionsFromSheet() {
-  const directExpressRows = getRowsFromSheet(directExpressSheet);
+  const directExpressRows = getRows(directExpressSheet);
   if (directExpressRows.length === 0)
     throw new Error("No direct express transactions found");
 
@@ -100,7 +100,7 @@ export function writeToDirectExpressSheet() {
     throw new Error("Attempting to overwrite sheet with empty data!");
   }
 
-  overwriteSheet(directExpressSheet, getAsRows());
+  overwrite(directExpressSheet, getAsRows());
 }
 
 /**

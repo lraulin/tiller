@@ -2,13 +2,7 @@ import * as de from "../direct-express/main.js";
 
 import { Transaction, TransactionColumnName } from "./types.js";
 import { ascending, isValidDate } from "../utils.js";
-import {
-  backup,
-  getRowsFromSheet,
-  getSheet,
-  overwriteSheet,
-  sortSheet,
-} from "../sheets/main.js";
+import { backup, get, getRows, overwrite, sort } from "../sheets/main.js";
 import {
   getTransactionColumnNumber,
   parseNumericTransactionId,
@@ -30,7 +24,7 @@ import { getCategoryLookup } from "../categories/main.js";
 const SHEET_NAME = "Transactions";
 
 /**@type {GoogleAppsScript.Spreadsheet.Sheet} */
-const sheet = getSheet(SHEET_NAME);
+const sheet = get(SHEET_NAME);
 
 /**@type {Transaction[]} */
 let transactions = [];
@@ -49,7 +43,7 @@ export const restoreTransactionsSheet = backup(SHEET_NAME);
  * @returns {Transaction[]}
  */
 function getTransactionsFromSheet() {
-  const transactionRows = getRowsFromSheet(sheet);
+  const transactionRows = getRows(sheet);
   if (transactionRows.length === 0) throw new Error("No transactions found");
 
   const rowToTransactionWithCategory = rowToTransaction(getCategoryLookup());
@@ -113,7 +107,7 @@ export function writeTransactions() {
   }
 
   const data = transactions.map(toRow);
-  overwriteSheet(sheet, data);
+  overwrite(sheet, data);
 }
 
 function getMostRecentDirectExpressTransactionId() {
@@ -136,7 +130,7 @@ export function importDirectExpress() {
     ...transactions,
     ...directExpressImports.map(directExpressToTransaction),
   ];
-  overwriteSheet(sheet, transactions.map(toRow));
+  overwrite(sheet, transactions.map(toRow));
   sortTransactionsSheet();
 }
 
@@ -183,5 +177,5 @@ export function sortTransactionsSheet({
   ascending = false,
 } = {}) {
   const column = getTransactionColumnNumber(columnName);
-  sortSheet({ sheet, column, ascending });
+  sort({ sheet, column, ascending });
 }
