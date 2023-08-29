@@ -1,10 +1,8 @@
-import * as tiller from "./transactions/main.js";
-
-import { appendToSheet, clearAllBackups, getSheet } from "./sheets/main.js";
-
 import { TimeUnit } from "./categories/types.js";
-import { cleanUp } from "./direct-express/global.js";
+import directExpress from "./direct-express/index.js";
 import { getSpendingData } from "./core.js";
+import sheets from "./sheets/index.js";
+import transactions from "./transactions/index.js";
 
 /**
  * @typedef {object} SpendingTableParams
@@ -17,13 +15,13 @@ import { getSpendingData } from "./core.js";
  */
 function fillSpendingTable({ unit, string }) {
   const data = getSpendingData({
-    transactions: tiller.getExpenses(),
+    transactions: transactions.getExpenses(),
     lastDate: new Date(),
     unit,
   });
-  const sheet = getSheet(string);
+  const sheet = sheets.get(string);
   sheet.clearContents();
-  appendToSheet(sheet, data);
+  sheets.append(sheet, data);
 }
 
 function fillSpendingTables() {
@@ -38,7 +36,7 @@ function fillSpendingTables() {
 
 export function fillCustomSheets() {
   fillSpendingTables();
-  tiller.importDirectExpress();
+  transactions.importDirectExpress();
 }
 
 export function onOpen() {
@@ -48,8 +46,8 @@ export function onOpen() {
     .addItem("Fill My Sheets", "fillCustomSheets")
     .addItem("Sort Transactions", "sortTransactions")
     .addItem("Clean Up Direct Express", "cleanUpDirectExpress")
-    .addItem("Backup Transactions", "backupTransactionsSheet")
-    .addItem("Restore Transactions", "restoreTransactionsSheet")
+    .addItem("Backup Transactions", "backupTransactions")
+    .addItem("Restore Transactions", "restoreTransactions")
     .addItem("Clear All Backups", "clearAllBackups")
     .addToUi();
 }
@@ -58,12 +56,12 @@ export function onOpen() {
 const global = {};
 global.onOpen = onOpen;
 global.fillCustomSheets = fillCustomSheets;
-global.importDirectExpress = tiller.importDirectExpress;
-global.sortTransactions = tiller.sortTransactionsSheet;
-global.cleanUpDirectExpress = cleanUp;
-global.backupTransactionsSheet = tiller.backupTransactionsSheet;
-global.restoreTransactionsSheet = tiller.restoreTransactionsSheet;
-global.clearAllBackups = clearAllBackups;
+global.importDirectExpress = transactions.importDirectExpress;
+global.sortTransactions = transactions.sort;
+global.cleanUpDirectExpress = directExpress.cleanUp;
+global.backupTransactions = transactions.backup;
+global.restoreTransactions = transactions.restore;
+global.clearAllBackups = sheets.clearAllBackups;
 
 // But "global" is no longer available in GAS; globalThis works instead
 // https://developers.google.com/apps-script/guides/v8-runtime/migration#global

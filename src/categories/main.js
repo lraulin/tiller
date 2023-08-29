@@ -1,5 +1,5 @@
 import { Category, CategoryLookup } from "./types.js";
-import { getRowsFromSheet, getSheet } from "../sheets/main.js";
+import { get, getRows } from "../sheets/main.js";
 
 import { categoryLookupReducer } from "./reducers.js";
 import { rowToCategory } from "./transformers.js";
@@ -7,7 +7,7 @@ import { rowToCategory } from "./transformers.js";
 const SHEET_NAME = "Categories";
 
 /**@type {GoogleAppsScript.Spreadsheet.Sheet} */
-const categorySheet = getSheet(SHEET_NAME);
+const categorySheet = get(SHEET_NAME);
 
 /**@type {Category[]} */
 let categories = [];
@@ -24,7 +24,7 @@ export function getCategories() {
     return categories;
   }
 
-  const categoryRows = getRowsFromSheet(categorySheet);
+  const categoryRows = getRows(categorySheet);
   if (categoryRows.length === 0) throw new Error("No categories found");
 
   categories = categoryRows.map(rowToCategory);
