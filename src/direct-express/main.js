@@ -5,6 +5,8 @@ import { DirectExpressTransaction } from "./types.js";
 import { byTransactionIdDescending } from "./sorters.js";
 import { createTransaction } from "../transactions/transformers.js";
 
+export const PENDING_PREFIX = "[PENDING] ";
+
 const SHEET_NAME = "DirectExpress";
 const ACCOUNT_NAME = "Direct Express";
 const ACCOUNT_NUMBER = "xxxx0947";
@@ -161,7 +163,7 @@ const directExpressTransactionOLOO = {
       institution: INSTITUTION,
       accountNumber: ACCOUNT_NUMBER,
       description: this.isPending
-        ? "[PENDING] " + this.description
+        ? PENDING_PREFIX + this.description
         : this.description,
       fullDescription: [this.city, this.state, this.country].join(", "),
       transactionId: String(this.transactionId),

@@ -1,4 +1,5 @@
 import { CategoryType } from "../categories/types.js";
+import { PENDING_PREFIX } from "../direct-express/main.js";
 import { Transaction } from "./types.js";
 
 /**
@@ -28,4 +29,4 @@ export const institutionIsPenfed = institutionFilter("Penfed");
  * @param {Transaction} t
  * @returns {boolean}
  */
-export const isNotPending = (t) => !t.description.includes("[Pending]");
+export const isNotPending = (t) => !t.description.includes(PENDING_PREFIX);
