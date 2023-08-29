@@ -46,8 +46,8 @@ export function onOpen() {
     .addItem("Fill My Sheets", "fillCustomSheets")
     .addItem("Sort Transactions", "sortTransactions")
     .addItem("Clean Up Direct Express", "cleanUpDirectExpress")
-    .addItem("Backup Transactions", "backupTransactionsSheet")
-    .addItem("Restore Transactions", "restoreTransactionsSheet")
+    .addItem("Backup Transactions", "backupTransactions")
+    .addItem("Restore Transactions", "restoreTransactions")
     .addItem("Clear All Backups", "clearAllBackups")
     .addToUi();
 }
@@ -57,10 +57,10 @@ const global = {};
 global.onOpen = onOpen;
 global.fillCustomSheets = fillCustomSheets;
 global.importDirectExpress = transactions.importDirectExpress;
-global.sortTransactions = transactions.sortTransactionsSheet;
+global.sortTransactions = transactions.sort;
 global.cleanUpDirectExpress = directExpress.cleanUp;
-global.backupTransactionsSheet = transactions.backupTransactionsSheet;
-global.restoreTransactionsSheet = transactions.restoreTransactionsSheet;
+global.backupTransactions = transactions.backup;
+global.restoreTransactions = transactions.restore;
 global.clearAllBackups = sheets.clearAllBackups;
 
 // But "global" is no longer available in GAS; globalThis works instead
