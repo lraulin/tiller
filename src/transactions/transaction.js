@@ -1,5 +1,7 @@
 import { startOfMonth, startOfWeek } from "../utils.js";
 
+import { DirectExpressTransaction } from "../direct-express/types.js";
+import { PENDING_PREFIX } from "../direct-express/main.js";
 import categories from "../categories/index.js";
 
 const DATE_INDEX = 1;
@@ -20,37 +22,34 @@ const CATEGORIZED_DATE_INDEX = 15;
 
 export default class Transaction {
   /**@type {Date} */
-  date;
+  #date;
+
   /**@type {string} */
-  description;
+  description = "";
   /**@type {string} */
-  category;
+  category = "";
   /**@type {string} */
-  type;
+  type = "";
   /**@type {boolean} */
-  hidden;
+  hidden = false;
   /**@type {number} */
-  amount;
+  amount = 0;
   /**@type {string} */
-  account;
+  account = "";
   /**@type {string} */
-  accountNumber;
+  accountNumber = "";
   /**@type {string} */
-  institution;
+  institution = "";
+  /**@type {string} */
+  transactionId = "";
+  /**@type {string} */
+  accountId = "";
+  /**@type {string} */
+  checkNumber = "";
+  /**@type {string} */
+  fullDescription = "";
   /**@type {Date} */
-  month;
-  /**@type {Date} */
-  week;
-  /**@type {string} */
-  transactionId;
-  /**@type {string} */
-  accountId;
-  /**@type {string} */
-  checkNumber;
-  /**@type {string} */
-  fullDescription;
-  /**@type {Date} */
-  dateAdded;
+  dateAdded = new Date();
   /**@type {Date|undefined} */
   categorizedDate;
 
@@ -58,7 +57,7 @@ export default class Transaction {
     if (Array.isArray(data)) {
       this.#initFromRow(data);
     } else if (typeof data === "object") {
-      this.#initFromObject(data);
+      this.#initFromDirectExpress(data);
     }
   }
 
@@ -79,22 +78,56 @@ export default class Transaction {
     this.dateAdded = row[DATE_ADDED_INDEX];
     this.categorizedDate = row[CATEGORIZED_DATE_INDEX];
 
-    const categoryData = categories.getCategoriesLookup()?.[category];
+    const categoryData = categories.getCategoryLookup()?.[this.category];
     this.type = categoryData?.type ?? "Uncategorized";
     this.hidden = categoryData?.hidden ?? false;
   }
-  #initFromObject(obj) {}
+  //TODO: this will assume it's a direct express object for now;
+  // ideally have one for Direct Express and another for creating a new one from scratch with data supplied by the caller
+  /**
+   *
+   * @param {DirectExpressTransaction} obj
+   */
+  #initFromDirectExpress(obj) {
+    this.date = obj.date ?? new Date();
+    this.description = obj.description;
+    this.amount = obj.amount;
+    this.account = "Direct Express";
+    this.institution = "Comerica";
+    this.transactionId = String(obj.transactionId);
+    this.fullDescription = [obj.city, obj.state, obj.country].join(", ");
+
+    const categoryData = categories.getCategoryLookup()?.[this.category];
+    this.type = categoryData?.type ?? "Uncategorized";
+    this.hidden = categoryData?.hidden ?? false;
+  }
 
   /** @param {Date} date */
   set date(date) {
-    this.date = date;
+    this.#date = date;
     this.week = startOfWeek(date);
     this.month = startOfMonth(date);
   }
 
   /** @returns {Date} */
   get date() {
-    return this.date;
+    return this.#date;
+  }
+
+  get isExpense() {
+    return this.type === "Expense";
+  }
+
+  get isIncome() {
+    return this.type === "Income";
+  }
+
+  get isPending() {
+    return this.description.includes(PENDING_PREFIX);
+  }
+
+  get isFromDirectExpress() {
+    return this.institution === "Comerica";
   }
 
   /** @returns {any[]} */

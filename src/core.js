@@ -1,7 +1,7 @@
 import { ascending, getDateRange, isValidDate, startOf } from "./utils.js";
 
 import { TimeUnit } from "./categories/types.js";
-import { Transaction } from "./transactions/types.js";
+import Transaction from "./transactions/transaction.js";
 import dayjs from "dayjs";
 import { getFirstTransactionDate } from "./transactions/main.js";
 import isBetween from "dayjs/plugin/isBetween.js";

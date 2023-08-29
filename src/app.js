@@ -1,8 +1,8 @@
 import { TimeUnit } from "./categories/types.js";
+import TransactionService from "./transactions/transaction-service.js";
 import directExpress from "./direct-express/index.js";
 import { getSpendingData } from "./core.js";
 import sheets from "./sheets/index.js";
-import transactions from "./transactions/index.js";
 
 /**
  * @typedef {object} SpendingTableParams
@@ -15,7 +15,7 @@ import transactions from "./transactions/index.js";
  */
 function fillSpendingTable({ unit, string }) {
   const data = getSpendingData({
-    transactions: transactions.getExpenses(),
+    transactions: TransactionService.expenses,
     lastDate: new Date(),
     unit,
   });
@@ -36,7 +36,7 @@ function fillSpendingTables() {
 
 export function fillCustomSheets() {
   fillSpendingTables();
-  transactions.importDirectExpress();
+  TransactionService.importDirectExpress();
 }
 
 export function onOpen() {
@@ -56,11 +56,11 @@ export function onOpen() {
 const global = {};
 global.onOpen = onOpen;
 global.fillCustomSheets = fillCustomSheets;
-global.importDirectExpress = transactions.importDirectExpress;
-global.sortTransactions = transactions.sort;
+global.importDirectExpress = TransactionService.importDirectExpress;
+global.sortTransactions = TransactionService.sortByDate;
 global.cleanUpDirectExpress = directExpress.cleanUp;
-global.backupTransactions = transactions.backup;
-global.restoreTransactions = transactions.restore;
+global.backupTransactions = TransactionService.backup;
+global.restoreTransactions = TransactionService.restore;
 global.clearAllBackups = sheets.clearAllBackups;
 
 // But "global" is no longer available in GAS; globalThis works instead

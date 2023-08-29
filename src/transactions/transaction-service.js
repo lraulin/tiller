@@ -1,9 +1,11 @@
 import Transaction from "./transaction.js";
+import directExpress from "../direct-express/index.js";
 import sheets from "../sheets/index.js";
+import { sort } from "./main.js";
 
 const SHEET_NAME = "Transactions";
 
-export default class TransactionsService {
+class TransactionsService {
   sheetName = SHEET_NAME;
 
   /**@type {GoogleAppsScript.Spreadsheet.Sheet} */
@@ -12,20 +14,38 @@ export default class TransactionsService {
   #transactions;
 
   constructor() {
-    this.#sheet =
+    const sheet =
       SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-    if (!this.#sheet) throw new Error(`Sheet ${SHEET_NAME} not found`);
+    if (sheet === null) throw new Error(`Sheet ${SHEET_NAME} not found`);
+    this.#sheet = sheet;
   }
 
   get expenses() {
-    return this.#transactions.filter((t) => t.isExpense());
+    return this.#transactions.filter((t) => t.isExpense);
   }
 
   get income() {
-    return this.#transactions.filter((t) => t.isIncome());
+    return this.#transactions.filter((t) => t.isIncome);
   }
 
-  get firstTransactionDate() {}
+  get firstTransactionDate() {
+    const timeStamp = Math.min(
+      ...this.#transactions.map((t) => t.date.getTime())
+    );
+    return new Date(timeStamp);
+  }
+
+  get lastTransactionDate() {
+    const timeStamp = Math.max(
+      ...this.#transactions.map((t) => t.date.getTime())
+    );
+    return new Date(timeStamp);
+  }
+
+  get lastFromDirectExpress() {
+    sort();
+    return this.#transactions.filter((t) => t.isFromDirectExpress)?.[0];
+  }
 
   /**
    * Sorts transcactions by date descending.
@@ -38,7 +58,7 @@ export default class TransactionsService {
    * Gets data from Transactions sheet.
    */
   loadData() {
-    const [...rows] = sheet.getDataRange().getValues();
+    const [...rows] = this.#sheet.getDataRange().getValues();
     this.#transactions = rows.map((row) => new Transaction(row));
   }
   /**
@@ -46,21 +66,43 @@ export default class TransactionsService {
    */
 
   saveData() {
-    const data = this.#transactions.map((t) => t.toArray());
-    sheets.overwrite(this.#sheetName, data);
+    const data = this.#transactions.map((t) => t.toRow());
+    sheets.overwrite(this.#sheet, data);
   }
 
   /**
    * Creates a copy of the sheet appendded with "_BACKUP_{#}"
    */
   backup() {
-    sheets.backup(this.#sheetName);
+    sheets.backup(this.sheetName);
   }
 
   /**
    * Replaces Transaction sheet with the most recent backup.
    */
   restore() {
-    sheets.restoreBackup(this.#sheetName);
+    sheets.restoreBackup(this.sheetName);
+  }
+
+  importDirectExpress() {
+    sheets.backup(SHEET_NAME);
+    const pendingTransactions = this.#transactions.filter((t) => t.isPending);
+
+    const afterTransId = parseInt(this.lastFromDirectExpress.transactionId);
+    if (Number.isNaN(afterTransId))
+      throw new Error("Invalid Direct Express transaction id");
+
+    const directExpressImports = directExpress.getDirectExpressTransactions({
+      afterTransId,
+    });
+
+    this.#transactions = [
+      ...this.#transactions,
+      ...directExpressImports.map((d) => new Transaction(d)),
+    ];
+    this.sortByDate();
+    this.saveData();
   }
 }
+
+export default new TransactionsService();
