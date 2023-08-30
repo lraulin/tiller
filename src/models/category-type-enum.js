@@ -1,5 +1,5 @@
 /**
- * Represents a type of category, such as Expense, Income, Transfer or None.
+ * Enum for the type of a category: "Expense"|"Income"|"Transfer"
  */
 export default class CategoryType {
   #name = "";
@@ -62,7 +62,7 @@ export default class CategoryType {
    * Converts the CategoryType instance to its string representation.
    * @returns {string} The name of the category type.
    */
-  static toString() {
+  toString() {
     return this.#name;
   }
 }

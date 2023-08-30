@@ -1,4 +1,4 @@
-export const WORKBOOK_NAME = "Tiller Foundation Template";
+const WORKBOOK_NAME = "Tiller Foundation Template";
 const BACKUP_POSTFIX = "Backup";
 
 /**
@@ -20,7 +20,7 @@ const getBackupName = (
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @returns {any[]}
  */
-export const getFirstRow = (sheet) =>
+const getFirstRow = (sheet) =>
   sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
 
 /**
@@ -28,7 +28,7 @@ export const getFirstRow = (sheet) =>
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @returns
  */
-export const getHeaderNames = (sheet) =>
+const getHeaderNames = (sheet) =>
   getFirstRow(sheet).map((cell) => cell.toString());
 
 /**@type {string[]} */
@@ -56,7 +56,7 @@ function getNames(forceUpdate = false) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @returns {any[][]}
  */
-export function getRows(sheet) {
+function getRows(sheet) {
   const [, ...rows] = sheet.getDataRange().getValues();
   return rows;
 }
@@ -65,7 +65,7 @@ export function getRows(sheet) {
  * Generic helper functions for interacting with Google Sheets.
  */
 
-export function alert(message) {
+function alert(message) {
   SpreadsheetApp.getUi().alert(message);
 }
 
@@ -75,7 +75,7 @@ export function alert(message) {
  * @param {string} name
  * @return {GoogleAppsScript.Spreadsheet.Sheet}
  */
-export function get(name) {
+function get(name) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
   if (!sheet) throw new Error(`Unable to retrieve '${name}' sheet`);
   return sheet;
@@ -86,7 +86,7 @@ export function get(name) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @param {any[][]} data
  */
-export function append(sheet, data) {
+function append(sheet, data) {
   if (!data.length) Logger.log("No data to append!");
   const lastRow = sheet.getLastRow();
   sheet.getRange(lastRow + 1, 1, data.length, data[0].length).setValues(data);
@@ -96,7 +96,7 @@ export function append(sheet, data) {
  *
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  */
-export function clearDataKeepHeaders(sheet) {
+function clearDataKeepHeaders(sheet) {
   const dataRange = getDataRangeWithoutHeaders(sheet);
   dataRange.clearContent();
 }
@@ -106,7 +106,7 @@ export function clearDataKeepHeaders(sheet) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @param {any[][]} data
  */
-export function overwrite(sheet, data) {
+function overwrite(sheet, data) {
   clearDataKeepHeaders(sheet);
   append(sheet, data);
 }
@@ -118,7 +118,7 @@ export function overwrite(sheet, data) {
  * @param {number} param0.column
  * @param {boolean} param0.ascending
  */
-export function sort({ sheet, column, ascending = true }) {
+function sort({ sheet, column, ascending = true }) {
   const range = getDataRangeWithoutHeaders(sheet);
   range.sort({ column, ascending });
 }
@@ -129,7 +129,7 @@ export function sort({ sheet, column, ascending = true }) {
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
  * @returns {GoogleAppsScript.Spreadsheet.Range}
  */
-export function getDataRangeWithoutHeaders(sheet) {
+function getDataRangeWithoutHeaders(sheet) {
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn());
 }
 
@@ -149,7 +149,7 @@ const getHighestBackupNumber = (sheetNames, baseName) => {
  *
  * @param {string} sheetName
  */
-export function backup(sheetName) {
+function backup(sheetName) {
   return function () {
     const workBook = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = get(sheetName);
@@ -164,7 +164,7 @@ export function backup(sheetName) {
  *
  * @param {string} baseSheetName
  */
-export function restoreBackup(baseSheetName) {
+function restoreBackup(baseSheetName) {
   return function () {
     const backupNumber = getHighestBackupNumber(sheetNames, baseSheetName);
     const originalSheet = get(baseSheetName);
@@ -183,12 +183,13 @@ export function restoreBackup(baseSheetName) {
   };
 }
 
-export function clearAllBackups() {
+function clearAllBackups() {
   const workBook = SpreadsheetApp.getActiveSpreadsheet();
   const sheets = workBook.getSheets();
   const backups = sheets.filter(
     (s) => s.getName().includes(BACKUP_POSTFIX) || s.getName().includes("Copy")
   );
+  Logger.log("Deleting" + backups.length + " sheets");
   backups.forEach((b) => workBook.deleteSheet(b));
 }
 
@@ -200,6 +201,24 @@ export function clearAllBackups() {
 //   sheet.copyTo(destination);
 // }
 
-(function init() {
-  getNames();
-})();
+/**
+ * Get data from sheet as array of objects with keys matching column headers.
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @returns
+ */
+const getDataWithHeaders = (sheet) => {
+  if (!sheet) throw new Error("Called 'getDatafrom sheet' with falsy argument");
+
+  const [headers, ...data] = sheet.getDataRange().getValues();
+
+  return data.map((row) => {
+    return row.reduce((acc, value, i) => {
+      const key = headers[i];
+      if (key === "") return acc;
+      return { ...acc, [key]: value };
+    }, {});
+  });
+};
+
+export default { get, overwrite, backup, restoreBackup, clearAllBackups };

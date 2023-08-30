@@ -11,34 +11,36 @@
 
 export default class DirectExpressTransaction {
   /** @type {Date?} */
-  date;
+  date = null;
   /** @type {number} */
-  transactionId;
+  transactionId = 0;
   /** @type {string} */
-  description;
+  description = "";
   /** @type {number} */
-  amount;
+  amount = 0;
   /** @type {string} */
-  transactionType;
+  transactionType = "";
   /** @type {string} */
-  city;
+  city = "";
   /** @type {string} */
-  state;
+  state = "";
   /** @type {string} */
-  country;
+  country = "";
   /** @type {boolean} */
   isPending;
 
-  constructor([
-    date,
-    transactionId,
-    description,
-    amount,
-    transactionType,
-    city,
-    state,
-    country,
-  ]) {
+  constructor(row) {
+    const [
+      date,
+      transactionId,
+      description,
+      amount,
+      transactionType,
+      city,
+      state,
+      country,
+    ] = row;
+
     this.date = date === "Pending" ? null : date;
     this.transactionId = transactionId;
     this.description = description;

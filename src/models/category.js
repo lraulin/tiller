@@ -1,3 +1,5 @@
+import CategoryType from "../models/category-type-enum.js";
+
 // const headers = [
 //   "Category",
 //   "Group",
@@ -60,30 +62,28 @@ export default class Category {
 
   /**
    * Creates an instance of the Category class.
-   * @param {Array} parameters - An array containing values for [category, group, type, hideFromReports].
-   * @param {string} parameters.0 - The name of the category.
-   * @param {string} parameters.1 - The group that this category belongs to.
-   * @param {string} parameters.2 - The string representation of the category type.
-   * @param {string} parameters.3 - A string that indicates if the category should be hidden ("Hide" means it should be hidden).
+   * @param {Array} row - An array containing cell values for a row from the Category Table.
    */
-  constructor([
-    category,
-    group,
-    type,
-    hideFromReports,
-    jan2023,
-    feb2023,
-    mar2023,
-    apr2023,
-    may2023,
-    jun2023,
-    jul2023,
-    aug2023,
-    sep2023,
-    oct2023,
-    nov2023,
-    dec2023,
-  ]) {
+  constructor(row) {
+    const [
+      category,
+      group,
+      type,
+      hideFromReports,
+      jan2023,
+      feb2023,
+      mar2023,
+      apr2023,
+      may2023,
+      jun2023,
+      jul2023,
+      aug2023,
+      sep2023,
+      oct2023,
+      nov2023,
+      dec2023,
+    ] = row;
+
     this.name = category;
     this.type = CategoryType.fromString(type);
     this.group = group;
