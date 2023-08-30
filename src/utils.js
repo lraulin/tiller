@@ -104,3 +104,23 @@ export const areSame = (unit) => (a, b) => dayjs(a).isSame(b, unit);
  * @returns {boolean}
  */
 export const isValidDate = (d) => d instanceof Date && !isNaN(d.getTime());
+
+/**
+ * Get data from sheet as array of objects with keys matching column headers.
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @returns
+ */
+export const getDataFromSheet = (sheet) => {
+  if (!sheet) throw new Error("Called 'getDatafrom sheet' with falsy argument");
+
+  const [headers, ...data] = sheet.getDataRange().getValues();
+
+  return data.map((row) => {
+    return row.reduce((acc, value, i) => {
+      const key = headers[i];
+      if (key === "") return acc;
+      return { ...acc, [key]: value };
+    }, {});
+  });
+};
