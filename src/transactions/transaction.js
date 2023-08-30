@@ -131,7 +131,7 @@ export default class Transaction {
   }
 
   /** @returns {any[]} */
-  toRow() {
+  toArray() {
     const row = Array(16).fill(undefined);
     row[DATE_INDEX] = this.date;
     row[DESCRIPTION_INDEX] = this.description;

@@ -3,10 +3,10 @@ import directExpress from "../direct-express/index.js";
 import sheets from "../sheets/index.js";
 import { sort } from "./main.js";
 
-const SHEET_NAME = "Transactions";
+const TRANSACTIONS = "Transactions";
 
 class TransactionsService {
-  sheetName = SHEET_NAME;
+  sheetName = TRANSACTIONS;
 
   /**@type {GoogleAppsScript.Spreadsheet.Sheet} */
   #sheet;
@@ -15,8 +15,8 @@ class TransactionsService {
 
   constructor() {
     const sheet =
-      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-    if (sheet === null) throw new Error(`Sheet ${SHEET_NAME} not found`);
+      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TRANSACTIONS);
+    if (sheet === null) throw new Error(`Sheet ${TRANSACTIONS} not found`);
     this.#sheet = sheet;
   }
 
@@ -66,7 +66,7 @@ class TransactionsService {
    */
 
   saveData() {
-    const data = this.#transactions.map((t) => t.toRow());
+    const data = this.#transactions.map((t) => t.toArray());
     sheets.overwrite(this.#sheet, data);
   }
 
@@ -89,7 +89,7 @@ class TransactionsService {
   }
 
   importDirectExpress() {
-    sheets.backup(SHEET_NAME);
+    sheets.backup(TRANSACTIONS);
     const pendingTransactions = this.#transactions.filter((t) => t.isPending);
 
     const afterTransId = parseInt(this.lastFromDirectExpress.transactionId);
