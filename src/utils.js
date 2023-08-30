@@ -124,3 +124,14 @@ export const getDataFromSheet = (sheet) => {
     }, {});
   });
 };
+
+/**
+ *
+ * @param {string} name
+ * @returns {GoogleAppsScript.Spreadsheet.Sheet}
+ */
+export const getSheetByName = (name) => {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  if (sheet === null) throw new Error(`Sheet ${name} not found`);
+  return sheet;
+};

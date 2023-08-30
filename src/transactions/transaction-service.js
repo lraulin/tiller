@@ -1,5 +1,6 @@
 import Transaction from "./transaction.js";
 import directExpress from "../direct-express/index.js";
+import { getSheetByName } from "../utils.js";
 import sheets from "../sheets/index.js";
 import { sort } from "./main.js";
 
@@ -14,10 +15,7 @@ class TransactionsService {
   #transactions;
 
   constructor() {
-    const sheet =
-      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TRANSACTIONS);
-    if (sheet === null) throw new Error(`Sheet ${TRANSACTIONS} not found`);
-    this.#sheet = sheet;
+    this.#sheet = getSheetByName(TRANSACTIONS);
   }
 
   get expenses() {

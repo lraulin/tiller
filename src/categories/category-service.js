@@ -1,6 +1,8 @@
+import { getSheetByName } from "../utils.js";
+
 const CATEGORIES = "Categories";
 
-export default class CategoryService {
+class CategoryService {
   sheetName = CATEGORIES;
   /**@type {GoogleAppsScript.Spreadsheet.Sheet} */
   #sheet;
@@ -9,10 +11,7 @@ export default class CategoryService {
   #typeLookup = {};
 
   constructor() {
-    const sheet =
-      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
-    if (sheet === null) throw new Error(`Sheet ${SHEET_NAME} not found`);
-    this.#sheet = sheet;
+    this.#sheet = getSheetByName(CATEGORIES);
   }
 
   load() {
@@ -35,3 +34,5 @@ export default class CategoryService {
     return type;
   }
 }
+
+export default new CategoryService();
