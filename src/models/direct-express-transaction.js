@@ -13,14 +13,16 @@ const DirectExpressTransactionFactory = stampit({
     country: "",
     isPending: false,
   },
-  /** @this {DirectExpressTransaction} */
   init(data) {
     if (Array.isArray(data)) {
       this.fromRow(data);
       return;
     }
-
-    const {
+    this.initFromObject(data);
+  },
+  methods: {
+    /** @this {DirectExpressTransaction} */
+    initFromObject({
       date,
       transactionId,
       description,
@@ -30,32 +32,28 @@ const DirectExpressTransactionFactory = stampit({
       state,
       country,
       isPending,
-    } = data;
-
-    this.date = date;
-    this.transactionId = transactionId;
-    this.description = description;
-    this.amount = amount;
-    this.transactionType = transactionType;
-    this.city = city;
-    this.state = state;
-    this.country = country;
-    this.isPending = isPending;
-  },
-  methods: {
+    }) {
+      this.date = date;
+      this.transactionId = transactionId;
+      this.description = description;
+      this.amount = amount;
+      this.transactionType = transactionType;
+      this.city = city;
+      this.state = state;
+      this.country = country;
+      this.isPending = isPending;
+    },
     /** @this {DirectExpressTransaction} */
     fromRow(row) {
-      this.init({
-        date: row[0] === "Pending" ? null : row[0],
-        transactionId: row[1],
-        description: row[2],
-        amount: row[3],
-        transactionType: row[4],
-        city: row[5],
-        state: row[6],
-        country: row[7],
-        isPending: row[0] === "Pending",
-      });
+      this.date = row[0] === "Pending" ? null : row[0];
+      this.transactionId = row[1];
+      this.description = row[2];
+      this.amount = row[3];
+      this.transactionType = row[4];
+      this.city = row[5];
+      this.state = row[6];
+      this.country = row[7];
+      this.isPending = row[0] === "Pending";
     },
     /** @this {DirectExpressTransaction} */
     toArray() {
