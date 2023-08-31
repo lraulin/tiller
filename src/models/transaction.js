@@ -121,21 +121,19 @@ const TransactionFactory = stampit({
       this.categorizedDate = categorizedDate;
     },
     initFromRow(row) {
-      this.init({
-        date: row[columns.date],
-        description: row[columns.description],
-        category: row[columns.category],
-        amount: row[columns.amount],
-        account: row[columns.account],
-        accountNumber: row[columns.accountNumber],
-        institution: row[columns.institution],
-        transactionId: row[columns.transactionId],
-        accountId: row[columns.accountId],
-        checkNumber: row[columns.checkNumber],
-        fullDescription: row[columns.fullDescription],
-        dateAdded: row[columns.dateAdded],
-        categorizedDate: row[columns.categorizedDate],
-      });
+      this.date = row[columns.date];
+      this.description = row[columns.description];
+      this.category = row[columns.category];
+      this.amount = row[columns.amount];
+      this.account = row[columns.account];
+      this.accountNumber = row[columns.accountNumber];
+      this.institution = row[columns.institution];
+      this.transactionId = row[columns.transactionId];
+      this.accountId = row[columns.accountId];
+      this.checkNumber = row[columns.checkNumber];
+      this.fullDescription = row[columns.fullDescription];
+      this.dateAdded = row[columns.dateAdded];
+      this.categorizedDate = row[columns.categorizedDate];
     },
 
     /** @this {Transaction} */
