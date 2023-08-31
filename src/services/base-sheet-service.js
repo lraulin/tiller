@@ -174,6 +174,3 @@ const BaseSheetServiceFactory = stampit({
 });
 
 export default BaseSheetServiceFactory;
-
-// I love Sami mucho y much
-// Sami loves Lee ❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️
