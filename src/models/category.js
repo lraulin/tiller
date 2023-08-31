@@ -73,26 +73,22 @@ const CategoryFactory = stampit({
       this.budget.dec2023 = budget.dec2023 ?? 0;
     },
     initFromRow(row) {
-      this.init({
-        name: row[columns.category],
-        type: CategoryType[row[columns.typeName]],
-        group: row[columns.group],
-        isHidden: row[columns.hideFromReports] === "Hidden",
-        budget: {
-          jan2023: row[columns.jan2023],
-          feb2023: row[columns.feb2023],
-          mar2023: row[columns.mar2023],
-          apr2023: row[columns.apr2023],
-          may2023: row[columns.may2023],
-          jun2023: row[columns.jun2023],
-          jul2023: row[columns.jul2023],
-          aug2023: row[columns.aug2023],
-          sep2023: row[columns.sep2023],
-          oct2023: row[columns.oct2023],
-          nov2023: row[columns.nov2023],
-          dec2023: row[columns.dec2023],
-        },
-      });
+      this.name = row[columns.category];
+      this.type = CategoryType[row[columns.typeName]];
+      this.group = row[columns.group];
+      this.isHidden = row[columns.hideFromReports] === "Hidden";
+      this.budget.jan2023 = row[columns.jan2023];
+      this.budget.feb2023 = row[columns.feb2023];
+      this.budget.mar2023 = row[columns.mar2023];
+      this.budget.apr2023 = row[columns.apr2023];
+      this.budget.may2023 = row[columns.may2023];
+      this.budget.jun2023 = row[columns.jun2023];
+      this.budget.jul2023 = row[columns.jul2023];
+      this.budget.aug2023 = row[columns.aug2023];
+      this.budget.sep2023 = row[columns.sep2023];
+      this.budget.oct2023 = row[columns.oct2023];
+      this.budget.nov2023 = row[columns.nov2023];
+      this.budget.dec2023 = row[columns.dec2023];
     },
     toRow() {
       return [
