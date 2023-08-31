@@ -2,10 +2,10 @@ import { DirectExpressService, TransactionService } from "../shared/types.js";
 
 import { InitializationError } from "../shared/errors.js";
 import { MasterService } from "../shared/types.js";
-import directExpressService from "./direct-express-service.js";
+import getDirectExpressService from "./direct-express-service.js";
+import getTransactionService from "./transaction-service.js";
 import sheets from "../shared/sheets.js";
 import stampit from "stampit";
-import transactionService from "./transaction-service.js";
 
 const ERR_MSG_TRANSACTION_SERVICE_NULL = "transactionService is null";
 const ERR_MSG_DIRECT_EXPRESS_SERVICE_NULL = "directExpressService is null";
@@ -36,21 +36,27 @@ const MasterServiceFactory = stampit({
     /** @this {MasterService} */
     importDirectExpressToTransactions() {
       Logger.log("Importing from Direct Express to Transactions");
+      if (!this.transactionService)
+        throw new InitializationError(ERR_MSG_TRANSACTION_SERVICE_NULL);
+      if (!this.directExpressService)
+        throw new InitializationError(ERR_MSG_DIRECT_EXPRESS_SERVICE_NULL);
 
-      transactionService.backup();
+      this.transactionService.backup();
 
       const afterTransId =
-        transactionService.lastNonPendingFromDirectExpress?.transactionId;
+        this.transactionService.lastNonPendingFromDirectExpress?.transactionId;
       Logger.log("afterTransId: " + afterTransId);
 
-      const directExpressImports = directExpressService.getNewTransactions({
-        afterTransId,
-      });
+      const directExpressImports = this.directExpressService.getNewTransactions(
+        {
+          afterTransId,
+        }
+      );
       Logger.log(
         directExpressImports.length + " new transactions from Direct Express"
       );
 
-      transactionService.updateFromDirectExpress(directExpressImports);
+      this.transactionService.updateFromDirectExpress(directExpressImports);
     },
 
     /** @this {MasterService} */
@@ -100,5 +106,8 @@ const MasterServiceFactory = stampit({
 });
 
 /** @type {MasterService} */
-const masterService = MasterServiceFactory();
+const masterService = MasterServiceFactory({
+  directExpressService: getDirectExpressService(),
+  transactionService: getTransactionService(),
+});
 export default masterService;

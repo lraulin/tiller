@@ -3,7 +3,6 @@ export class InitializationError extends Error {
   constructor(message) {
     super(message);
     this.name = "InitializationError";
-    SpreadsheetApp.getUi().alert(message);
   }
 }
 
@@ -14,6 +13,5 @@ export class SheetError extends Error {
   constructor(message) {
     super(message);
     this.name = "InitializationError";
-    SpreadsheetApp.getUi().alert(message);
   }
 }
