@@ -1,6 +1,7 @@
+import { DirectExpressTransaction } from "../shared/types.js";
 import stampit from "stampit";
 
-const DirectExpressTransaction = stampit({
+const DirectExpressTransactionFactory = stampit({
   props: {
     date: null,
     transactionId: 0,
@@ -12,6 +13,7 @@ const DirectExpressTransaction = stampit({
     country: "",
     isPending: false,
   },
+  /** @this {DirectExpressTransaction} */
   init({
     date,
     transactionId,
@@ -34,6 +36,7 @@ const DirectExpressTransaction = stampit({
     this.isPending = isPending;
   },
   methods: {
+    /** @this {DirectExpressTransaction} */
     fromRow(row) {
       this.init({
         date: row[0] === "Pending" ? null : row[0],
@@ -47,6 +50,7 @@ const DirectExpressTransaction = stampit({
         isPending: row[0] === "Pending",
       });
     },
+    /** @this {DirectExpressTransaction} */
     toArray() {
       return [
         this.date ?? "Pending",
@@ -62,4 +66,4 @@ const DirectExpressTransaction = stampit({
   },
 });
 
-export default DirectExpressTransaction;
+export default DirectExpressTransactionFactory;

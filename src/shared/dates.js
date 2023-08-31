@@ -32,7 +32,7 @@ export const startOfMonth = startOf("month");
  * unit supplied (day, week, month, etc.)
  *
  * @param {dayjs.OpUnitType} unit
- * @returns {function(Date, Date):boolean}
+ * @returns {function(Date?, Date?):boolean}
  */
 export const areSame = (unit) => (a, b) => dayjs(a).isSame(b, unit);
 

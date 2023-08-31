@@ -1,19 +1,18 @@
 import BaseSheetService from "./base-sheet-service.js";
-import DirectExpressTransaction from "../models/direct-express-transaction.js";
+import { DirectExpressService } from "../shared/types.js";
+import DirectExpressTransactionFactory from "../models/direct-express-transaction.js";
 
-
-const DirectExpressService = BaseSheetService({
+const DirectExpressServiceFactory = BaseSheetService({
   sheetName: "DirectExpress",
-  model: DirectExpressTransaction,
+  model: DirectExpressTransactionFactory,
 }).compose({
   // #region METHODS
   methods: {
-    
     getNewTransactions(lastId) {
       if (lastId === undefined) return [...this.data];
       return this.data.filter((t) => t.transactionId > lastId);
     },
-    
+
     dedupe() {
       const lookup = this.data.reduce((acc, c) => {
         acc[c.transactionId] = c;
@@ -25,5 +24,6 @@ const DirectExpressService = BaseSheetService({
   }, // #endregion METHODS
 });
 
-export default DirectExpressService;
-
+/** @type {DirectExpressService} */
+const service = DirectExpressServiceFactory();
+export default service;

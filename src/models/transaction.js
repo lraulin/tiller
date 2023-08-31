@@ -2,12 +2,9 @@ import { startOfMonth, startOfWeek } from "../shared/dates.js";
 
 import { DIRECT_EXPRESS } from "../shared/consts.js";
 import { PENDING_DESCRIPTION_PREFIX } from "../shared/consts.js";
+import { Transaction } from "../shared/types.js";
 import categoryService from "../services/category-service.js";
 import stampit from "stampit";
-
-/**
- * @typedef {Object} Transaction
- */
 
 const columns = Object.freeze({
   "(Tiller Image)": 0,
@@ -28,7 +25,7 @@ const columns = Object.freeze({
   categorizedDate: 15,
 });
 
-const Transaction = stampit({
+const TransactionFactory = stampit({
   // #region PROPERTIES
   props: {
     date: null,
@@ -81,29 +78,37 @@ const Transaction = stampit({
   // #region METHODS
   methods: {
     // #region GETTERS
+    /** @this {Transaction} */
     get week() {
       return startOfWeek(this.date);
     },
+    /** @this {Transaction} */
     get month() {
       return startOfMonth(this.date);
     },
+    /** @this {Transaction} */
     get isExpense() {
       return this.type === "Expense";
     },
+    /** @this {Transaction} */
     get isIncome() {
       return this.type === "Income";
     },
+    /** @this {Transaction} */
     get isPending() {
       return this.description.includes(PENDING_DESCRIPTION_PREFIX);
     },
+    /** @this {Transaction} */
     get isFromDirectExpress() {
       return this.institution === "Comerica";
     },
+    /** @this {Transaction} */
     get type() {
-      return categoryService.getCategoryByName(this.category)?.type;
+      return categoryService.getCategoryData(this.category)?.type;
     },
+    /** @this {Transaction} */
     get group() {
-      return categoryService.getCategoryByName(this.category)?.group;
+      return categoryService.getCategoryData(this.category)?.group;
     },
     // #endregion GETTERS
     // #region INIT HELPERS
@@ -125,6 +130,7 @@ const Transaction = stampit({
       });
     },
 
+    /** @this {Transaction} */
     fromDirectExpress(det) {
       this.init({
         date: det.date ?? new Date(),
@@ -139,6 +145,7 @@ const Transaction = stampit({
     },
     // #endregion INIT HELPERS
     // #region ARRAY HELPERS
+    /** @this {Transaction} */
     toArray() {
       const row = Array(16).fill("");
       row[columns.date] = this.date;
@@ -163,4 +170,4 @@ const Transaction = stampit({
   },
 });
 
-export default Transaction;
+export default TransactionFactory;

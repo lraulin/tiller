@@ -24,7 +24,7 @@ const columns = Object.freeze({
  * Represents a category that includes properties like name, type, group, and hidden status.
  * This is primarily designed for representing a row from Tiller's Category Table.
  */
-const Category = stampit({
+const CategoryFactory = stampit({
   props: {
     name: "",
     type: CategoryType.NONE,
@@ -109,4 +109,4 @@ const Category = stampit({
   },
 });
 
-export default Category;
+export default CategoryFactory;
