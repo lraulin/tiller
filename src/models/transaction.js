@@ -45,34 +45,13 @@ const TransactionFactory = stampit({
   },
   // #endregion PROPERTIES
   // #region INIT
-  init({
-    date,
-    description,
-    category,
-    amount,
-    account,
-    accountNumber,
-    institution,
-    transactionId,
-    accountId,
-    checkNumber,
-    fullDescription,
-    dateAdded,
-    categorizedDate,
-  }) {
-    this.date = date;
-    this.description = description;
-    this.category = category;
-    this.amount = amount;
-    this.account = account;
-    this.accountNumber = accountNumber;
-    this.institution = institution;
-    this.transactionId = transactionId;
-    this.accountId = accountId;
-    this.checkNumber = checkNumber;
-    this.fullDescription = fullDescription;
-    this.dateAdded = dateAdded;
-    this.categorizedDate = categorizedDate;
+  init(data) {
+    if (Array.isArray(data)) {
+      this.initFromRow(data);
+      return;
+    }
+
+    this.initFromObject(data);
   },
   // #endregion INIT
   // #region METHODS
@@ -112,7 +91,36 @@ const TransactionFactory = stampit({
     },
     // #endregion GETTERS
     // #region INIT HELPERS
-    fromRow(row) {
+    initFromObject({
+      date,
+      description,
+      category,
+      amount,
+      account,
+      accountNumber,
+      institution,
+      transactionId,
+      accountId,
+      checkNumber,
+      fullDescription,
+      dateAdded,
+      categorizedDate,
+    }) {
+      this.date = date;
+      this.description = description;
+      this.category = category;
+      this.amount = amount;
+      this.account = account;
+      this.accountNumber = accountNumber;
+      this.institution = institution;
+      this.transactionId = transactionId;
+      this.accountId = accountId;
+      this.checkNumber = checkNumber;
+      this.fullDescription = fullDescription;
+      this.dateAdded = dateAdded;
+      this.categorizedDate = categorizedDate;
+    },
+    initFromRow(row) {
       this.init({
         date: row[columns.date],
         description: row[columns.description],

@@ -88,12 +88,14 @@ const BaseSheetServiceFactory = stampit({
      * @this {BaseSheetService}
      */
     load() {
+      Logger.log("Loading data from " + this.sheetName + " sheet");
       if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       if (this.model === null) throw new InitializationError(ERR_MSG_NO_MODEL);
 
       const [, ...rows] = this.sheet.getDataRange().getValues();
-      // @ts-ignore
-      this.data = rows.map((row) => this.model(row));
+      this.data = rows.map((row) => this.model?.(row));
+      Logger.log("Loaded " + this.data.length + " rows");
+      Logger.log(this.data);
     },
 
     /**

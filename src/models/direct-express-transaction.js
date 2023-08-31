@@ -14,17 +14,24 @@ const DirectExpressTransactionFactory = stampit({
     isPending: false,
   },
   /** @this {DirectExpressTransaction} */
-  init({
-    date,
-    transactionId,
-    description,
-    amount,
-    transactionType,
-    city,
-    state,
-    country,
-    isPending,
-  }) {
+  init(data) {
+    if (Array.isArray(data)) {
+      this.fromRow(data);
+      return;
+    }
+
+    const {
+      date,
+      transactionId,
+      description,
+      amount,
+      transactionType,
+      city,
+      state,
+      country,
+      isPending,
+    } = data;
+
     this.date = date;
     this.transactionId = transactionId;
     this.description = description;
