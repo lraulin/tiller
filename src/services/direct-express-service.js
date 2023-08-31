@@ -13,6 +13,8 @@ const DirectExpressServiceFactory = stampit(BaseSheetServiceFactory, {
 
     /** @this {DirectExpressService} */
     dedupe() {
+      const startedWith = this.data.length;
+      Logger.log("Cleaning up " + startedWith + " transactions");
       const lookup = this.data.reduce((acc, c) => {
         acc[c.transactionId] = c;
         return acc;
@@ -23,6 +25,9 @@ const DirectExpressServiceFactory = stampit(BaseSheetServiceFactory, {
           (b.date?.getTime() ?? Number.MAX_SAFE_INTEGER) -
           (a.date?.getTime() || Number.MAX_SAFE_INTEGER)
       );
+      const dupsRemoved = startedWith - this.data.length;
+      Logger.log("Removed " + dupsRemoved + " duplicate transactions");
+      this.save();
     },
   }, // #endregion METHODS
 });
