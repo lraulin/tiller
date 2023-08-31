@@ -102,14 +102,19 @@ const TransactionServiceFactory = stampit(BaseSheetService, {
     },
 
     /**@this {TransactionService} */
-    generateSpendingReport({ unit, string }) {
+    generateSpendingReport({ unit, sheetName }) {
       const data = this.getSpendingReportData({
         lastDate: new Date(),
         unit,
       });
-      const sheet = sheets.get(string);
+      const sheet =
+        SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+      if (!sheet) throw new Error(`Unable to find sheet ${sheetName}`);
       sheet.clearContents();
-      sheets.append(sheet, data);
+      const lastRow = sheet.getLastRow();
+      sheet
+        .getRange(lastRow + 1, 1, data.length, data[0].length)
+        .setValues(data);
     },
 
     /**@this {TransactionService} */
