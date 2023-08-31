@@ -5,6 +5,10 @@ import { PENDING_DESCRIPTION_PREFIX } from "../shared/consts.js";
 import categoryService from "../services/category-service.js";
 import stampit from "stampit";
 
+/**
+ * @typedef {Object} Transaction
+ */
+
 const columns = Object.freeze({
   "(Tiller Image)": 0,
   date: 1,
