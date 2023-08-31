@@ -1,17 +1,28 @@
+import { BaseSheetService } from "../shared/types.js";
 import stampit from "stampit";
 
-const BaseSheetService = stampit({
+const ERR_MSG_NULL_PROPS = "service not initialized";
+const ERR_MSG_NO_SHEET = ERR_MSG_NULL_PROPS + ": sheet not found";
+const ERR_MSG_NO_MODEL = ERR_MSG_NULL_PROPS + ": missing data model";
+
+const BaseSheetServiceStamp = stampit({
   // #region PROPERTIES
   props: {
-    /**@type {GoogleAppsScript.Spreadsheet.Sheet|null} */
     sheet: null,
-    /**@type {Function|null} */
+
     model: null,
-    /**@type {any[]} */
+
     data: [],
   }, // #endregion PROPERTIES
 
   // #region INIT
+
+  /**
+   * @this {BaseSheetService}
+   * @param {Object} param0
+   * @param {string} param0.sheetName
+   * @param {Function} param0.model
+   */
   init({ sheetName, model }) {
     this.sheet =
       SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
@@ -22,11 +33,34 @@ const BaseSheetService = stampit({
 
   // #region METHODS
   methods: {
+    /**
+     * @this {BaseSheetService}
+     */
+    get headers() {
+      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
+      return this.sheet
+        .getRange(1, 1, 1, this.sheet.getLastColumn())
+        .getValues()[0]
+        .map((h) => String(h).trim());
+    },
+
+    /**
+     * @this {BaseSheetService}
+     */
     load() {
+      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
+      if (this.model === null) throw new Error(ERR_MSG_NO_MODEL);
+
       const [, ...rows] = this.sheet.getDataRange().getValues();
+      // @ts-ignore
       this.data = rows.map((row) => this.model(row));
     },
+
+    /**
+     * @this {BaseSheetService}
+     */
     save() {
+      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
       const lastRow = this.sheet.getLastRow();
       const rangeToOverwrite = this.sheet.getRange(
         2,
@@ -41,10 +75,13 @@ const BaseSheetService = stampit({
       this.sheet
         .getRange(lastRow + 1, 1, rows.length, rows[0].length)
         .setValues(rows);
-      this.sortSheet();
     },
+
+    /**
+     * @this {BaseSheetService}
+     */
     sortSheet(sortSpecObj) {
-      /**@type {GoogleAppsScript.Spreadsheet.Range} */
+      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
       const range = this.sheet.getRange(
         2,
         1,
@@ -54,7 +91,18 @@ const BaseSheetService = stampit({
       range.sort(sortSpecObj);
       this.load();
     },
+
+    /**
+     * @this {BaseSheetService}
+     */
+    sortByColumn({ columnName, ascending = true }) {
+      const column =
+        this.headers
+          .map((h) => String(this.headers).toLocaleLowerCase())
+          .indexOf(columnName.toLocaleLowerCase()) + 1;
+      this.sortSheet({ column, ascending });
+    },
   }, // #endregion METHODS
 });
 
-export default BaseSheetService;
+export default BaseSheetServiceStamp;

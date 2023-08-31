@@ -4,6 +4,7 @@
   - automatically find spreadsheet in drive?
 - use redux
 - find out if I can invoke Tiller functions
+- Use Rtype https://github.com/ericelliott/rtype#rtype
 
 # Committed
 

@@ -1,28 +1,50 @@
-import BaseSheetService from "./base-sheet-service.js";
+import BaseSheetServiceStamp from "./base-sheet-service.js";
 import Category from "../models/category.js";
+import stampit from "stampit";
 
-const CategoryService = BaseSheetService({
-  sheetName: "Categories",
-  model: Category,
-}).compose({
-  // #region PROPERTIES
-  props: {
-    lookup: {},
-  }, // #endregion PROPERTIES
+///
+// CategoryService is responsible for interacting with the 'Categories' sheet.
+// It extends the BaseSheetService to handle category-specific functionality.
+//
+// @typedef {Object} CategoryServiceTypeExtensions
+//
+// @property {Object} lookup - A lookup table for quick category retrieval.
+// @property {Category[]} data - The loaded category data from the Google Sheet.
+//
+// @property {function(string): void} getCategoryData - Retrieves the data for a specified category.
+///
 
-  // #region INIT
-  init() {
-    this.lookup = this.data.reduce((acc, c) => {
-      return { ...acc, [c.name]: c };
-    }, {});
-  }, // #endregion INIT
+const CategoryService = stampit(
+  BaseSheetServiceStamp({
+    sheetName: "Categories",
+    model: Category,
+  }),
+  {
+    // #region PROPERTIES
+    props: {
+      
+      lookup: {},
+    }, // #endregion PROPERTIES
 
-  // #region METHODS
-  methods: {
-    getCategoryData(categoryName) {
-      return { ...this.lookup[categoryName] };
-    },
-  }, // #endregion METHODS
-});
+    // #region INIT
+    
+    init() {
+      this.lookup = this.data.reduce((acc, c) => {
+        return { ...acc, [c.name]: c };
+      }, {});
+    }, // #endregion INIT
 
-export default CategoryService();
+    // #region METHODS
+    methods: {
+      
+      getCategoryData(categoryName) {
+        return { ...this.lookup[categoryName] };
+      },
+    }, // #endregion METHODS
+  }
+);
+
+
+let CategoryServiceType;
+export default CategoryService;
+

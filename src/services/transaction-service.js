@@ -49,9 +49,7 @@ const TransactionService = stampit(
       get nonPendingTransactions() {
         return [...this.data.filter((t) => !t.isPending)];
       },
-      /**
-       * Sorts transcactions by date descending.
-       */
+
       sortByDateDescending() {
         this.data.sort(transactionsByDateDescending);
       },
@@ -59,33 +57,21 @@ const TransactionService = stampit(
       getTransactionInDateRange(start = undefined, stop = undefined) {
         const startDate = start ?? this.firstTransactionDate;
         const stopDate = stop ?? this.lastTransactionDate;
-        return this.#transactions.filter(
+        return this.data.filter(
           (t) => t.date >= startDate && t.date <= stopDate
         );
       },
 
-      /**
-       *
-       * @param {"day"|"week"|"month"} unit
-       * @param {Date} date
-       */
       getTransactionByTimeUnit(unit, date) {
         const areSameUnit = areSame(unit);
         return this.data.filter((t) => areSameUnit(t.date, date));
       },
-      /**
-       * Returns an array of arrays (suitable for table data) with total start date
-       * and amount total for each period supplied. I.e. if unit is 'days',
-       * will return amount total for each day within the given date range.
-       * If month, it will return a total for each month range, etc.
-       *
-       */
+
       getSpendingReportData({
         unit,
         lastDate,
         firstDate = this.firstTransactionDate,
       }) {
-        /**@type {function(Date):Date} */
         const startOfUnit = startOf(unit);
 
         const dates = getDateRange(
@@ -143,4 +129,4 @@ const TransactionService = stampit(
   }
 );
 
-export default TransactionsService;
+export default TransactionService;
