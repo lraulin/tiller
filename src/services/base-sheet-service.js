@@ -102,6 +102,7 @@ const BaseSheetServiceFactory = stampit({
      * @this {BaseSheetService}
      */
     save() {
+      Logger.log("Saving data to " + this.sheetName + " sheet");
       if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       const lastRow = this.sheet.getLastRow();
       const rangeToOverwrite = this.sheet.getRange(
@@ -114,6 +115,7 @@ const BaseSheetServiceFactory = stampit({
       rangeToOverwrite.clearContent();
 
       const rows = this.data.map((t) => t.toArray());
+      Logger.log(rows);
       this.sheet
         .getRange(lastRow + 1, 1, rows.length, rows[0].length)
         .setValues(rows);
