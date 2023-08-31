@@ -45,23 +45,23 @@ const CategoryFactory = stampit({
       dec2023: 0,
     },
   },
-  init({ name, type, group, isHidden, budget }) {
+  init({ name, type, group, isHidden, budget = {} } = {}) {
     this.name = name;
     this.type = type;
     this.group = group;
     this.isHidden = isHidden;
-    this.budget.jan2023 = budget.jan2023;
-    this.budget.feb2023 = budget.feb2023;
-    this.budget.mar2023 = budget.mar2023;
-    this.budget.apr2023 = budget.apr2023;
-    this.budget.may2023 = budget.may2023;
-    this.budget.jun2023 = budget.jun2023;
-    this.budget.jul2023 = budget.jul2023;
-    this.budget.aug2023 = budget.aug2023;
-    this.budget.sep2023 = budget.sep2023;
-    this.budget.oct2023 = budget.oct2023;
-    this.budget.nov2023 = budget.nov2023;
-    this.budget.dec2023 = budget.dec2023;
+    this.budget.jan2023 = budget.jan2023 ?? 0;
+    this.budget.feb2023 = budget.feb2023 ?? 0;
+    this.budget.mar2023 = budget.mar2023 ?? 0;
+    this.budget.apr2023 = budget.apr2023 ?? 0;
+    this.budget.may2023 = budget.may2023 ?? 0;
+    this.budget.jun2023 = budget.jun2023 ?? 0;
+    this.budget.jul2023 = budget.jul2023 ?? 0;
+    this.budget.aug2023 = budget.aug2023 ?? 0;
+    this.budget.sep2023 = budget.sep2023 ?? 0;
+    this.budget.oct2023 = budget.oct2023 ?? 0;
+    this.budget.nov2023 = budget.nov2023 ?? 0;
+    this.budget.dec2023 = budget.dec2023 ?? 0;
   },
   methods: {
     fromRow(row) {
