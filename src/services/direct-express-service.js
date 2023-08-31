@@ -11,13 +11,18 @@ const DirectExpressServiceFactory = stampit(BaseSheetServiceFactory, {
       return this.data.filter((t) => t.transactionId > lastId);
     },
 
+    /** @this {DirectExpressService} */
     dedupe() {
       const lookup = this.data.reduce((acc, c) => {
         acc[c.transactionId] = c;
         return acc;
       }, {});
       this.data = Object.values(lookup);
-      this.sortByDateDescending();
+      this.data.sort(
+        (a, b) =>
+          (b.date?.getTime() ?? Number.MAX_SAFE_INTEGER) -
+          (a.date?.getTime() || Number.MAX_SAFE_INTEGER)
+      );
     },
   }, // #endregion METHODS
 });
