@@ -3,131 +3,160 @@ import { startOfMonth, startOfWeek } from "../shared/dates.js";
 import { DIRECT_EXPRESS } from "../shared/consts.js";
 import { PENDING_DESCRIPTION_PREFIX } from "../shared/consts.js";
 import categoryService from "../services/category-service.js";
+import stampit from "stampit";
 
-const DATE_INDEX = 1;
-const DESCRIPTION_INDEX = 2;
-const CATEGORY_INDEX = 3;
-const AMOUNT_INDEX = 4;
-const ACCOUNT_INDEX = 5;
-const ACCOUNT_NUMBER_INDEX = 6;
-const INSTITUTION_INDEX = 7;
-const MONTH_INDEX = 8;
-const WEEK_INDEX = 9;
-const TRANSACTION_ID_INDEX = 10;
-const ACCOUNT_ID_INDEX = 11;
-const CHECK_NUMBER_INDEX = 12;
-const FULL_DESCRIPTION_INDEX = 13;
-const DATE_ADDED_INDEX = 14;
-const CATEGORIZED_DATE_INDEX = 15;
+const columns = Object.freeze({
+  "(Tiller Image)": 0,
+  date: 1,
+  description: 2,
+  category: 3,
+  amount: 4,
+  account: 5,
+  accountNumber: 6,
+  institution: 7,
+  month: 8,
+  week: 9,
+  transactionId: 10,
+  accountId: 11,
+  checkNumber: 12,
+  fullDescription: 13,
+  dateAdded: 14,
+  categorizedDate: 15,
+});
 
-export default class Transaction {
-  /**@type {Date} */
-  #date;
+const Transaction = stampit({
+  // #region PROPERTIES
+  props: {
+    date: null,
+    description: "",
+    category: "",
+    hidden: false,
+    amount: 0,
+    account: "",
+    accountNumber: "",
+    institution: "",
+    transactionId: "",
+    accountId: "",
+    checkNumber: "",
+    fullDescription: "",
+    dateAdded: new Date(),
+    categorizedDate: undefined,
+  },
+  // #endregion PROPERTIES
+  // #region INIT
+  init({
+    date,
+    description,
+    category,
+    amount,
+    account,
+    accountNumber,
+    institution,
+    transactionId,
+    accountId,
+    checkNumber,
+    fullDescription,
+    dateAdded,
+    categorizedDate,
+  }) {
+    this.date = date;
+    this.description = description;
+    this.category = category;
+    this.amount = amount;
+    this.account = account;
+    this.accountNumber = accountNumber;
+    this.institution = institution;
+    this.transactionId = transactionId;
+    this.accountId = accountId;
+    this.checkNumber = checkNumber;
+    this.fullDescription = fullDescription;
+    this.dateAdded = dateAdded;
+    this.categorizedDate = categorizedDate;
+  },
+  // #endregion INIT
+  // #region METHODS
+  methods: {
+    // #region GETTERS
+    get week() {
+      return startOfWeek(this.date);
+    },
+    get month() {
+      return startOfMonth(this.date);
+    },
+    get isExpense() {
+      return this.type === "Expense";
+    },
+    get isIncome() {
+      return this.type === "Income";
+    },
+    get isPending() {
+      return this.description.includes(PENDING_DESCRIPTION_PREFIX);
+    },
+    get isFromDirectExpress() {
+      return this.institution === "Comerica";
+    },
+    get type() {
+      return categoryService.getCategoryByName(this.category)?.type;
+    },
+    get group() {
+      return categoryService.getCategoryByName(this.category)?.group;
+    },
+    // #endregion GETTERS
+    // #region INIT HELPERS
+    fromRow(row) {
+      this.init({
+        date: row[columns.date],
+        description: row[columns.description],
+        category: row[columns.category],
+        amount: row[columns.amount],
+        account: row[columns.account],
+        accountNumber: row[columns.accountNumber],
+        institution: row[columns.institution],
+        transactionId: row[columns.transactionId],
+        accountId: row[columns.accountId],
+        checkNumber: row[columns.checkNumber],
+        fullDescription: row[columns.fullDescription],
+        dateAdded: row[columns.dateAdded],
+        categorizedDate: row[columns.categorizedDate],
+      });
+    },
 
-  description = "";
-  category = "";
-  type = "";
-  hidden = false;
-  amount = 0;
-  account = "";
-  accountNumber = "";
-  institution = "";
-  transactionId = "";
-  accountId = "";
-  checkNumber = "";
-  fullDescription = "";
-  dateAdded = new Date();
-  /**@type {Date|undefined} */
-  categorizedDate = undefined;
+    fromDirectExpress(det) {
+      this.init({
+        date: det.date ?? new Date(),
+        description: det.description,
+        amount: det.amount,
+        account: DIRECT_EXPRESS.ACCOUNT_NAME,
+        institution: DIRECT_EXPRESS.INSTITUTION,
+        accountNumber: DIRECT_EXPRESS.ACCOUNT_NUMBER,
+        transactionId: String(det.transactionId),
+        fullDescription: [det.city, det.state, det.country].join(", "),
+      });
+    },
+    // #endregion INIT HELPERS
+    // #region ARRAY HELPERS
+    toArray() {
+      const row = Array(16).fill("");
+      row[columns.date] = this.date;
+      row[columns.description] = this.description;
+      row[columns.category] = this.category;
+      row[columns.amount] = this.amount;
+      row[columns.account] = this.account;
+      row[columns.accountNumber] = this.accountNumber;
+      row[columns.institution] = this.institution;
+      row[columns.week] = this.week;
+      row[columns.month] = this.month;
+      row[columns.transactionId] = this.transactionId;
+      row[columns.accountId] = this.accountId;
+      row[columns.checkNumber] = this.checkNumber;
+      row[columns.fullDescription] = this.fullDescription;
+      row[columns.dateAdded] = this.dateAdded;
+      row[columns.categorizedDate] = this.categorizedDate;
+      return row;
+    },
+    // #endregion ARRAY HELPERS
+    // #endregion METHODS
+  },
+});
 
-  constructor(data) {
-    if (Array.isArray(data)) {
-      this.#initFromRow(data);
-    } else if (typeof data === "object") {
-      this.#initFromDirectExpress(data);
-    }
-  }
-
-  #initFromRow(row) {
-    if (row.length < 16) throw new Error("Invalid transaction row");
-
-    this.date = row[DATE_INDEX];
-    this.description = row[DESCRIPTION_INDEX];
-    this.category = row[CATEGORY_INDEX];
-    this.amount = row[AMOUNT_INDEX];
-    this.account = row[ACCOUNT_INDEX];
-    this.accountNumber = row[ACCOUNT_NUMBER_INDEX];
-    this.institution = row[INSTITUTION_INDEX];
-    this.transactionId = row[TRANSACTION_ID_INDEX];
-    this.accountId = row[ACCOUNT_ID_INDEX];
-    this.checkNumber = row[CHECK_NUMBER_INDEX];
-    this.fullDescription = row[FULL_DESCRIPTION_INDEX];
-    this.dateAdded = row[DATE_ADDED_INDEX];
-    this.categorizedDate = row[CATEGORIZED_DATE_INDEX];
-
-    const categoryData = categoryService.getCategoryByName(this.category);
-    this.type = categoryData?.type ?? "Uncategorized";
-    this.hidden = categoryData?.hidden ?? false;
-  }
-  //TODO: this will assume it's a direct express object for now;
-  // ideally have one for Direct Express and another for creating a new one from scratch with data supplied by the caller
-  #initFromDirectExpress(obj) {
-    this.date = obj.date ?? new Date();
-    this.description = obj.description;
-    this.amount = obj.amount;
-    this.account = DIRECT_EXPRESS.ACCOUNT_NAME;
-    this.institution = DIRECT_EXPRESS.INSTITUTION;
-    this.accountNumber = DIRECT_EXPRESS.ACCOUNT_NUMBER;
-    this.transactionId = String(obj.transactionId);
-    this.fullDescription = [obj.city, obj.state, obj.country].join(", ");
-  }
-
-  /** @param {Date} date */
-  set date(date) {
-    this.#date = date;
-    this.week = startOfWeek(date);
-    this.month = startOfMonth(date);
-  }
-
-  /** @returns {Date} */
-  get date() {
-    return this.#date;
-  }
-
-  get isExpense() {
-    return this.type === "Expense";
-  }
-
-  get isIncome() {
-    return this.type === "Income";
-  }
-
-  get isPending() {
-    return this.description.includes(PENDING_DESCRIPTION_PREFIX);
-  }
-
-  get isFromDirectExpress() {
-    return this.institution === "Comerica";
-  }
-
-  /** @returns {any[]} */
-  toArray() {
-    const row = Array(16).fill(undefined);
-    row[DATE_INDEX] = this.date;
-    row[DESCRIPTION_INDEX] = this.description;
-    row[CATEGORY_INDEX] = this.category;
-    row[AMOUNT_INDEX] = this.amount;
-    row[ACCOUNT_INDEX] = this.account;
-    row[ACCOUNT_NUMBER_INDEX] = this.accountNumber;
-    row[INSTITUTION_INDEX] = this.institution;
-    row[MONTH_INDEX] = this.month;
-    row[WEEK_INDEX] = this.week;
-    row[TRANSACTION_ID_INDEX] = this.transactionId;
-    row[ACCOUNT_ID_INDEX] = this.accountId;
-    row[CHECK_NUMBER_INDEX] = this.checkNumber;
-    row[FULL_DESCRIPTION_INDEX] = this.fullDescription;
-    row[DATE_ADDED_INDEX] = this.dateAdded;
-    row[CATEGORIZED_DATE_INDEX] = this.categorizedDate;
-    return row;
-  }
-}
+export default Transaction;

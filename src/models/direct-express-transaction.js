@@ -1,47 +1,29 @@
-// const headers = [
-//   "DATE",
-//   "TRANSACTION ID",
-//   "DESCRIPTION",
-//   "AMOUNT",
-//   "TRANSACTION TYPE",
-//   "CITY",
-//   "STATE",
-//   "COUNTRY",
-// ];
+import stampit from "stampit";
 
-export default class DirectExpressTransaction {
-  /** @type {Date?} */
-  date = null;
-  /** @type {number} */
-  transactionId = 0;
-  /** @type {string} */
-  description = "";
-  /** @type {number} */
-  amount = 0;
-  /** @type {string} */
-  transactionType = "";
-  /** @type {string} */
-  city = "";
-  /** @type {string} */
-  state = "";
-  /** @type {string} */
-  country = "";
-  /** @type {boolean} */
-  isPending;
-
-  constructor(row) {
-    const [
-      date,
-      transactionId,
-      description,
-      amount,
-      transactionType,
-      city,
-      state,
-      country,
-    ] = row;
-
-    this.date = date === "Pending" ? null : date;
+const DirectExpressTransaction = stampit({
+  props: {
+    date: null,
+    transactionId: 0,
+    description: "",
+    amount: 0,
+    transactionType: "",
+    city: "",
+    state: "",
+    country: "",
+    isPending: false,
+  },
+  init({
+    date,
+    transactionId,
+    description,
+    amount,
+    transactionType,
+    city,
+    state,
+    country,
+    isPending,
+  }) {
+    this.date = date;
     this.transactionId = transactionId;
     this.description = description;
     this.amount = amount;
@@ -49,19 +31,35 @@ export default class DirectExpressTransaction {
     this.city = city;
     this.state = state;
     this.country = country;
-    this.isPending = date === "Pending";
-  }
+    this.isPending = isPending;
+  },
+  methods: {
+    fromRow(row) {
+      this.init({
+        date: row[0] === "Pending" ? null : row[0],
+        transactionId: row[1],
+        description: row[2],
+        amount: row[3],
+        transactionType: row[4],
+        city: row[5],
+        state: row[6],
+        country: row[7],
+        isPending: row[0] === "Pending",
+      });
+    },
+    toArray() {
+      return [
+        this.date ?? "Pending",
+        this.transactionId,
+        this.description,
+        this.amount,
+        this.transactionType,
+        this.city,
+        this.state,
+        this.country,
+      ];
+    },
+  },
+});
 
-  toArray() {
-    return [
-      this.date ?? "Pending",
-      this.transactionId,
-      this.description,
-      this.amount,
-      this.transactionType,
-      this.city,
-      this.state,
-      this.country,
-    ];
-  }
-}
+export default DirectExpressTransaction;

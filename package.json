@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "@types/google-apps-script": "^1.0.67",
-    "dayjs": "^1.11.9"
+    "dayjs": "^1.11.9",
+    "stampit": "^4.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.22.10",

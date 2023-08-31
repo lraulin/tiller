@@ -108,3 +108,5 @@ const Category = stampit({
     },
   },
 });
+
+export default Category;
