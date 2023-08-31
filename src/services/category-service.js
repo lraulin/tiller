@@ -1,6 +1,7 @@
 import BaseSheetServiceFactory from "./base-sheet-service.js";
 import CategoryFactory from "../models/category.js";
 import { CategoryService } from "../shared/types.js";
+import { InitializationError } from "../shared/errors.js";
 import stampit from "stampit";
 
 const CategoryServiceFactory = stampit(
@@ -17,6 +18,9 @@ const CategoryServiceFactory = stampit(
     // #region INIT
 
     init() {
+      if (!this.data.length) {
+        throw new InitializationError("Categories not loaded");
+      }
       this.lookup = this.data.reduce((acc, c) => {
         return { ...acc, [c.name]: c };
       }, {});

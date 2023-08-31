@@ -1,4 +1,5 @@
-const WORKBOOK_NAME = "Tiller Foundation Template";
+import { SheetError } from "./errors.js";
+
 const BACKUP_POSTFIX = "Backup";
 
 /**
@@ -44,7 +45,7 @@ function getNames(forceUpdate = false) {
 
   const sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
   if (!sheets.length) {
-    throw new Error("No sheets found");
+    throw new SheetError("No sheets found");
   }
 
   sheetNames = sheets.map((sheet) => sheet.getName());
@@ -77,7 +78,7 @@ function alert(message) {
  */
 function get(name) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
-  if (!sheet) throw new Error(`Unable to retrieve '${name}' sheet`);
+  if (!sheet) throw new SheetError(`Unable to retrieve '${name}' sheet`);
   return sheet;
 }
 
@@ -134,7 +135,7 @@ function getDataRangeWithoutHeaders(sheet) {
 }
 
 const getHighestBackupNumber = (sheetNames, baseName) => {
-  if (!sheetNames.length) throw new Error("No sheet names found");
+  if (!sheetNames.length) throw new SheetError("No sheet names found");
 
   const backupNumbers = sheetNames
     .filter((n) => n.includes(baseName))
@@ -172,7 +173,7 @@ function restoreBackup(baseSheetName) {
     const backupSheet =
       SpreadsheetApp.getActiveSpreadsheet().getSheetByName(backupName);
     if (!backupSheet)
-      throw new Error(`Unable to retrieve '${backupName}' sheet`);
+      throw new SheetError(`Unable to retrieve '${backupName}' sheet`);
 
     backup(baseSheetName);
 
@@ -208,7 +209,8 @@ function clearAllBackups() {
  * @returns
  */
 const getDataWithHeaders = (sheet) => {
-  if (!sheet) throw new Error("Called 'getDatafrom sheet' with falsy argument");
+  if (!sheet)
+    throw new SheetError("Called 'getDatafrom sheet' with falsy argument");
 
   const [headers, ...data] = sheet.getDataRange().getValues();
 

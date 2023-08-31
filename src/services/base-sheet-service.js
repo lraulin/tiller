@@ -1,9 +1,9 @@
 import { BaseSheetService } from "../shared/types.js";
+import { InitializationError } from "../shared/errors.js";
 import stampit from "stampit";
 
-const ERR_MSG_NULL_PROPS = "service not initialized";
-const ERR_MSG_NO_SHEET = ERR_MSG_NULL_PROPS + ": sheet not found";
-const ERR_MSG_NO_MODEL = ERR_MSG_NULL_PROPS + ": missing data model";
+const ERR_MSG_NO_SHEET = ": sheet not found";
+const ERR_MSG_NO_MODEL = ": missing data model";
 
 const BaseSheetServiceFactory = stampit({
   // #region PROPERTIES
@@ -26,7 +26,8 @@ const BaseSheetServiceFactory = stampit({
   init({ sheetName, model }) {
     this.sheet =
       SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-    if (!this.sheet) throw new Error(`Unable to retrieve '${sheetName}' sheet`);
+    if (!this.sheet)
+      throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
     this.model = model;
     this.load();
   }, // #endregion INIT
@@ -37,7 +38,7 @@ const BaseSheetServiceFactory = stampit({
      * @this {BaseSheetService}
      */
     get headers() {
-      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       return this.sheet
         .getRange(1, 1, 1, this.sheet.getLastColumn())
         .getValues()[0]
@@ -48,8 +49,8 @@ const BaseSheetServiceFactory = stampit({
      * @this {BaseSheetService}
      */
     load() {
-      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
-      if (this.model === null) throw new Error(ERR_MSG_NO_MODEL);
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+      if (this.model === null) throw new InitializationError(ERR_MSG_NO_MODEL);
 
       const [, ...rows] = this.sheet.getDataRange().getValues();
       // @ts-ignore
@@ -60,7 +61,7 @@ const BaseSheetServiceFactory = stampit({
      * @this {BaseSheetService}
      */
     save() {
-      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       const lastRow = this.sheet.getLastRow();
       const rangeToOverwrite = this.sheet.getRange(
         2,
@@ -81,7 +82,7 @@ const BaseSheetServiceFactory = stampit({
      * @this {BaseSheetService}
      */
     sortSheet(sortSpecObj) {
-      if (!this.sheet) throw new Error(ERR_MSG_NO_SHEET);
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       const range = this.sheet.getRange(
         2,
         1,

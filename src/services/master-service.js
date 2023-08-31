@@ -1,16 +1,14 @@
 import { DirectExpressService, TransactionService } from "../shared/types.js";
 
+import { InitializationError } from "../shared/errors.js";
 import { MasterService } from "../shared/types.js";
 import directExpressService from "./direct-express-service.js";
 import sheets from "../shared/sheets.js";
 import stampit from "stampit";
 import transactionService from "./transaction-service.js";
 
-const ERR_MSG_INIT = "MasterService not initialized";
-const ERR_MSG_TRANSACTION_SERVICE_NULL =
-  ERR_MSG_INIT + ": transactionService is null";
-const ERR_MSG_DIRECT_EXPRESS_SERVICE_NULL =
-  ERR_MSG_INIT + ": directExpressService is null";
+const ERR_MSG_TRANSACTION_SERVICE_NULL = "transactionService is null";
+const ERR_MSG_DIRECT_EXPRESS_SERVICE_NULL = "directExpressService is null";
 
 const MasterServiceFactory = stampit({
   // region PROPERTIES
@@ -59,7 +57,7 @@ const MasterServiceFactory = stampit({
     generateReports() {
       Logger.log("Generating reports");
       if (!this.transactionService)
-        throw new Error(ERR_MSG_TRANSACTION_SERVICE_NULL);
+        throw new InitializationError(ERR_MSG_TRANSACTION_SERVICE_NULL);
       this.transactionService.generateAllReports();
     },
 
@@ -67,7 +65,7 @@ const MasterServiceFactory = stampit({
     sortTransactions() {
       Logger.log("Sorting transactions");
       if (!this.transactionService)
-        throw new Error(ERR_MSG_TRANSACTION_SERVICE_NULL);
+        throw new InitializationError(ERR_MSG_TRANSACTION_SERVICE_NULL);
       this.transactionService.sortByDateDescending();
     },
 
@@ -75,7 +73,7 @@ const MasterServiceFactory = stampit({
     cleanUpDirectExpress() {
       Logger.log("Cleaning up Direct Express");
       if (!this.directExpressService)
-        throw new Error(ERR_MSG_DIRECT_EXPRESS_SERVICE_NULL);
+        throw new InitializationError(ERR_MSG_DIRECT_EXPRESS_SERVICE_NULL);
       this.directExpressService.dedupe();
     },
 
@@ -83,7 +81,7 @@ const MasterServiceFactory = stampit({
     backupTransactions() {
       Logger.log("Backing up transactions");
       if (!this.transactionService)
-        throw new Error(ERR_MSG_TRANSACTION_SERVICE_NULL);
+        throw new InitializationError(ERR_MSG_TRANSACTION_SERVICE_NULL);
       this.transactionService.backup();
     },
 
@@ -91,7 +89,7 @@ const MasterServiceFactory = stampit({
     restoreTransactions() {
       Logger.log("Restoring transactions");
       if (!this.transactionService)
-        throw new Error(ERR_MSG_TRANSACTION_SERVICE_NULL);
+        throw new InitializationError(ERR_MSG_TRANSACTION_SERVICE_NULL);
       this.transactionService.restore();
     },
 
