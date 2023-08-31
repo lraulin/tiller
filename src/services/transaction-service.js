@@ -8,7 +8,6 @@ import {
 import BaseSheetService from "./base-sheet-service.js";
 import Transaction from "../models/transaction.js";
 import { TransactionService } from "../shared/types.js";
-import sheets from "../shared/sheets.js";
 import stampit from "stampit";
 
 const sumTransactions = (transactions) =>
