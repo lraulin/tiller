@@ -1,5 +1,9 @@
 import masterService from "./services/master-service.js";
 
+Logger.log(`src/app.js`);
+Logger.log("masterService");
+Logger.log(masterService);
+
 export function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu("Lee")
@@ -16,13 +20,17 @@ export function onOpen() {
 // Gas plugin needs assignments to "global" to create top-level functions...
 const global = {};
 global.onOpen = onOpen;
-global.fillCustomSheets = masterService.generateReports;
-global.importDirectExpress = masterService.importDirectExpressToTransactions;
-global.sortTransactions = masterService.sortTransactions;
-global.cleanUpDirectExpress = masterService.cleanUpDirectExpress;
-global.backupTransactions = masterService.backupTransactions;
-global.restoreTransactions = masterService.restoreTransactions;
-global.clearAllBackups = masterService.clearAllBackups;
+global.fillCustomSheets = masterService.generateReports.bind(masterService);
+global.importDirectExpress =
+  masterService.importDirectExpressToTransactions.bind(masterService);
+global.sortTransactions = masterService.sortTransactions.bind(masterService);
+global.cleanUpDirectExpress =
+  masterService.cleanUpDirectExpress.bind(masterService);
+global.backupTransactions =
+  masterService.backupTransactions.bind(masterService);
+global.restoreTransactions =
+  masterService.restoreTransactions.bind(masterService);
+global.clearAllBackups = masterService.clearAllBackups.bind(masterService);
 
 // But "global" is no longer available in GAS; globalThis works instead
 // https://developers.google.com/apps-script/guides/v8-runtime/migration#global

@@ -33,5 +33,4 @@ const service = CategoryServiceFactory({
   sheetName: "Categories",
   model: CategoryFactory,
 });
-const getCategoryService = () => service;
-export default getCategoryService;
+export default service;

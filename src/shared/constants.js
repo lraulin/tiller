@@ -6,3 +6,5 @@ export const DIRECT_EXPRESS = Object.freeze({
   ACCOUNT_NUMBER: "xxxx0947",
   INSTITUTION: "Comerica",
 });
+
+export const BACKUP_POSTFIX = "Backup";

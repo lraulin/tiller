@@ -1,10 +1,10 @@
 import { DirectExpressService, TransactionService } from "../shared/types.js";
 
+import { BACKUP_POSTFIX } from "../shared/constants.js";
 import { InitializationError } from "../shared/errors.js";
 import { MasterService } from "../shared/types.js";
 import getDirectExpressService from "./direct-express-service.js";
 import getTransactionService from "./transaction-service.js";
-import sheets from "../shared/sheets.js";
 import stampit from "stampit";
 
 const ERR_MSG_TRANSACTION_SERVICE_NULL = "transactionService is null";
@@ -27,8 +27,12 @@ const MasterServiceFactory = stampit({
    * @param {TransactionService} param0.transactionService
    */
   init({ directExpressService, transactionService }) {
+    Logger.log("MasterServiceFactory.init");
+    Logger.log(this);
     this.directExpressService = directExpressService;
     this.transactionService = transactionService;
+    Logger.log("After init");
+    Logger.log(this);
   }, // endregion INIT
 
   // region METHODS
@@ -78,6 +82,8 @@ const MasterServiceFactory = stampit({
     /** @this {MasterService} */
     cleanUpDirectExpress() {
       Logger.log("Cleaning up Direct Express");
+      Logger.log(this);
+      Logger.log("^^^^^^^^");
       if (!this.directExpressService)
         throw new InitializationError(ERR_MSG_DIRECT_EXPRESS_SERVICE_NULL);
       this.directExpressService.dedupe();
@@ -100,7 +106,16 @@ const MasterServiceFactory = stampit({
     },
 
     clearAllBackups() {
-      sheets.clearAllBackups();
+      const workBook = SpreadsheetApp.getActiveSpreadsheet();
+      const sheets = workBook.getSheets();
+      const backups = sheets.filter(
+        (s) =>
+          s.getName().includes(BACKUP_POSTFIX) ||
+          s.getName().includes("Copy") ||
+          /Sheet\d+/.test(s.getName())
+      );
+      Logger.log("Deleting" + backups.length + " sheets");
+      backups.forEach((b) => workBook.deleteSheet(b));
     },
   }, // endregion METHODS
 });
@@ -110,4 +125,9 @@ const masterService = MasterServiceFactory({
   directExpressService: getDirectExpressService(),
   transactionService: getTransactionService(),
 });
+Logger.log(`src/services/master-service.js`);
+Logger.log("masterService");
+Logger.log(masterService);
+Logger.log("masterService.directExpressService");
+Logger.log(masterService.directExpressService);
 export default masterService;

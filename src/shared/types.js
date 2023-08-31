@@ -6,11 +6,20 @@ import CategoryType from "../models/category-type-enum.js";
  */
 
 /**
+ ************************
+ * SERVICES
+ ************************
+ *
+ */
+
+/**
  * BaseSheetService is responsible for interacting with Google Sheets.
  * It provides methods for loading and saving data, and initializes with a sheet name and model.
  *
  * @typedef {Object} BaseSheetService
  *
+ * @property {string} sheetName - The name of the Google Spreadsheet sheet.
+ * @property {number} highestBackupNumber - The highest backup number.
  * @property {GoogleAppsScript.Spreadsheet.Sheet|null} sheet - The Google Spreadsheet sheet object.
  * @property {Function|null} model - The model function used for processing rows.
  * @property {any[]} data - The loaded data from the Google Sheet.
@@ -24,41 +33,13 @@ import CategoryType from "../models/category-type-enum.js";
 export let BaseSheetService;
 
 /**
- * @typedef {Object} Transaction
- *
- * @property {Date|null} date - The date of the transaction.
- * @property {string} description - The description of the transaction.
- * @property {string} category - The category of the transaction.
- * @property {boolean} hidden - Whether the transaction is hidden or not.
- * @property {number} amount - The amount of the transaction.
- * @property {string} account - The account related to the transaction.
- * @property {string} accountNumber - The account number related to the transaction.
- * @property {string} institution - The institution related to the transaction.
- * @property {string} transactionId - The ID of the transaction.
- * @property {string} accountId - The ID of the account related to the transaction.
- * @property {string} checkNumber - The check number related to the transaction.
- * @property {string} fullDescription - The full description of the transaction.
- * @property {Date} dateAdded - The date the transaction was added.
- * @property {Date|undefined} categorizedDate - The date the transaction was categorized.
- * @property {boolean} isExpense - Whether the transaction is an expense or not.
- * @property {boolean} isIncome - Whether the transaction is income or not.
- * @property {Date} week - The week of the transaction.
- * @property {Date} month - The month of the transaction.
- * @property {boolean} isFromDirectExpress - Whether the transaction is from Direct Express or not.
- * @property {boolean} isPending - Whether the transaction is pending or not.
- * @property {string} type - The type of the transaction.
- * @property {Function} init - The unit of the transaction.
- */
-
-/**@type {Transaction} */
-export let Transaction;
-
-/**
  * BaseSheetService is responsible for interacting with Google Sheets.
  * It provides methods for loading and saving data, and initializes with a sheet name and model.
  *
- * @typedef {Object} TransactionService
+ * @typedef {Object} TransactionService extends BaseSheetService
  *
+ * @property {string} sheetName - The name of the Google Spreadsheet sheet.
+ * @property {number} highestBackupNumber - The highest backup number.
  * @property {GoogleAppsScript.Spreadsheet.Sheet|null} sheet - The Google Spreadsheet sheet object.
  * @property {Function|null} model - The model function used for processing rows.
  * @property {Transaction[]} data - The loaded data from the Google Sheet.
@@ -92,22 +73,14 @@ export let Transaction;
 export let TransactionService;
 
 /**
- * @typedef {Object} Category
- *
- * @property {string} name - The name of the category.
- * @property {typeof CategoryType} type - The type of the category.
- * @property {string} group - The group of the category.
- * @property {boolean} isHidden - Whether the category is hidden or not.
- * @property {Object} budget - The budget for the category.
- */
-
-/**
  * CategoryService is responsible for interacting with the 'Categories' sheet.
  * It extends the BaseSheetService to handle category-specific functionality.
  *
- * @typedef {Object} CategoryService
+ * @typedef {Object} CategoryService extends BaseSheetService
  *
  * FROM BASE
+ * @property {string} sheetName - The name of the Google Spreadsheet sheet.
+ * @property {number} highestBackupNumber - The highest backup number.
  * @property {GoogleAppsScript.Spreadsheet.Sheet|null} sheet - The Google Spreadsheet sheet object.
  * @property {Function|null} model - The model function used for processing rows.
  * @property {any[]} data - The loaded data from the Google Sheet.
@@ -127,30 +100,11 @@ export let TransactionService;
 export let CategoryService;
 
 /**
- * @typedef DirectExpressTransaction
- *
- * @property {Date?} date
- * @property {number} transactionId
- * @property {string} description
- * @property {number} amount
- * @property {string} transactionType
- * @property {string} city
- * @property {string} state
- * @property {string} country
- * @property {boolean} isPending
- * @property {Function} init
- * @property {Function} fromRow
- * @property {Function} toArray
- * @property {Function} fromDirectExpress
- */
-
-/** @type {DirectExpressTransaction} */
-export let DirectExpressTransaction;
-
-/**
- * @typedef DirectExpressService
+ * @typedef DirectExpressService extends BaseSheetService
  *
  * FROM BASE
+ * @property {string} sheetName - The name of the Google Spreadsheet sheet.
+ * @property {number} highestBackupNumber - The highest backup number.
  * @property {GoogleAppsScript.Spreadsheet.Sheet|null} sheet - The Google Spreadsheet sheet object.
  * @property {Function|null} model - The model function used for processing rows.
  * @property {DirectExpressTransaction[]} data - The loaded data from the Google Sheet.
@@ -183,3 +137,71 @@ export let DirectExpressService;
  */
 /** @type {MasterService} */
 export let MasterService;
+
+/**
+ ************************
+ * MODELS
+ ************************
+ *
+ */
+
+/**
+ * @typedef {Object} Transaction
+ *
+ * @property {Date|null} date - The date of the transaction.
+ * @property {string} description - The description of the transaction.
+ * @property {string} category - The category of the transaction.
+ * @property {boolean} hidden - Whether the transaction is hidden or not.
+ * @property {number} amount - The amount of the transaction.
+ * @property {string} account - The account related to the transaction.
+ * @property {string} accountNumber - The account number related to the transaction.
+ * @property {string} institution - The institution related to the transaction.
+ * @property {string} transactionId - The ID of the transaction.
+ * @property {string} accountId - The ID of the account related to the transaction.
+ * @property {string} checkNumber - The check number related to the transaction.
+ * @property {string} fullDescription - The full description of the transaction.
+ * @property {Date} dateAdded - The date the transaction was added.
+ * @property {Date|undefined} categorizedDate - The date the transaction was categorized.
+ * @property {boolean} isExpense - Whether the transaction is an expense or not.
+ * @property {boolean} isIncome - Whether the transaction is income or not.
+ * @property {Date} week - The week of the transaction.
+ * @property {Date} month - The month of the transaction.
+ * @property {boolean} isFromDirectExpress - Whether the transaction is from Direct Express or not.
+ * @property {boolean} isPending - Whether the transaction is pending or not.
+ * @property {string} type - The type of the transaction.
+ * @property {Function} init - The unit of the transaction.
+ */
+
+/**@type {Transaction} */
+export let Transaction;
+
+/**
+ * @typedef {Object} Category
+ *
+ * @property {string} name - The name of the category.
+ * @property {typeof CategoryType} type - The type of the category.
+ * @property {string} group - The group of the category.
+ * @property {boolean} isHidden - Whether the category is hidden or not.
+ * @property {Object} budget - The budget for the category.
+ */
+
+/**
+ * @typedef DirectExpressTransaction
+ *
+ * @property {Date?} date
+ * @property {number} transactionId
+ * @property {string} description
+ * @property {number} amount
+ * @property {string} transactionType
+ * @property {string} city
+ * @property {string} state
+ * @property {string} country
+ * @property {boolean} isPending
+ * @property {Function} init
+ * @property {Function} fromRow
+ * @property {Function} toArray
+ * @property {Function} fromDirectExpress
+ */
+
+/** @type {DirectExpressTransaction} */
+export let DirectExpressTransaction;

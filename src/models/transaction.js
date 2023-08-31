@@ -1,7 +1,7 @@
 import { startOfMonth, startOfWeek } from "../shared/dates.js";
 
-import { DIRECT_EXPRESS } from "../shared/consts.js";
-import { PENDING_DESCRIPTION_PREFIX } from "../shared/consts.js";
+import { DIRECT_EXPRESS } from "../shared/constants.js";
+import { PENDING_DESCRIPTION_PREFIX } from "../shared/constants.js";
 import { Transaction } from "../shared/types.js";
 import categoryService from "../services/category-service.js";
 import stampit from "stampit";
