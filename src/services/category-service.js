@@ -1,10 +1,10 @@
-import BaseSheetServiceStamp from "./base-sheet-service.js";
+import BaseSheetServiceFactory from "./base-sheet-service.js";
 import CategoryFactory from "../models/category.js";
 import { CategoryService } from "../shared/types.js";
 import stampit from "stampit";
 
 const CategoryServiceFactory = stampit(
-  BaseSheetServiceStamp({
+  BaseSheetServiceFactory({
     sheetName: "Categories",
     model: CategoryFactory,
   }),

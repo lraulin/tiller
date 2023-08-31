@@ -1,10 +1,10 @@
-import BaseSheetService from "./base-sheet-service.js";
+import BaseSheetServiceFactory from "./base-sheet-service.js";
 import { DirectExpressService } from "../shared/types.js";
 import DirectExpressTransactionFactory from "../models/direct-express-transaction.js";
 import stampit from "stampit";
 
 const DirectExpressServiceFactory = stampit(
-  BaseSheetService({
+  BaseSheetServiceFactory({
     sheetName: "DirectExpress",
     model: DirectExpressTransactionFactory,
   }),

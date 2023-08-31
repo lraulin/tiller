@@ -5,7 +5,7 @@ const ERR_MSG_NULL_PROPS = "service not initialized";
 const ERR_MSG_NO_SHEET = ERR_MSG_NULL_PROPS + ": sheet not found";
 const ERR_MSG_NO_MODEL = ERR_MSG_NULL_PROPS + ": missing data model";
 
-const BaseSheetServiceStamp = stampit({
+const BaseSheetServiceFactory = stampit({
   // #region PROPERTIES
   props: {
     sheet: null,
@@ -105,4 +105,4 @@ const BaseSheetServiceStamp = stampit({
   }, // #endregion METHODS
 });
 
-export default BaseSheetServiceStamp;
+export default BaseSheetServiceFactory;
