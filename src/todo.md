@@ -8,12 +8,13 @@
 
 # Committed
 
-- Preserve category on pending transactions when importing Direct Express
+- make a generazable DTO base stamp
 
 # Doing
 
--
+- get it working again!
 
 # Done
 
+- Preserve category on pending transactions when importing Direct Express
 -
