@@ -3,6 +3,7 @@ import { InitializationError, SheetError } from "../shared/errors.js";
 import { BACKUP_POSTFIX } from "../shared/constants.js";
 import { BaseSheetService } from "../shared/types.js";
 import stampit from "stampit";
+import { toCamelCase } from "../shared/strings.js";
 
 const ERR_MSG_NO_SHEET = ": sheet not found";
 const ERR_MSG_NO_MODEL = ": missing data model";
@@ -23,6 +24,13 @@ const getBackupName = (
 
 const hasData = (arr = []) => arr.some((v) => !!v);
 const justLetters = (str) => str.toLowerCase().replace(/[^a-z]/g, "");
+
+// Google Sheets API Helpers
+const { getActiveSpreadsheet, getUi } = SpreadsheetApp;
+const getSheetByName = (sheetName) =>
+  getActiveSpreadsheet().getSheetByName(sheetName);
+const getSheets = () => getActiveSpreadsheet().getSheets();
+const alert = (msg) => getUi().alert(msg);
 
 const BaseSheetServiceFactory = stampit({
   // #region PROPERTIES
@@ -46,8 +54,7 @@ const BaseSheetServiceFactory = stampit({
     Logger.log("sheetName: " + sheetName);
     Logger.log("model: " + model);
     this.sheetName = sheetName;
-    this.sheet =
-      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+    this.sheet = getSheetByName(sheetName);
     if (!this.sheet)
       throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
     this.model = model;
@@ -79,7 +86,7 @@ const BaseSheetServiceFactory = stampit({
 
     /** @this {BaseSheetService} */
     get highestBackupNumber() {
-      const sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
+      const sheets = getSheets();
       if (!sheets.length) {
         throw new SheetError("No sheets found");
       }
@@ -166,7 +173,7 @@ const BaseSheetServiceFactory = stampit({
     backup() {
       if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
 
-      const workBook = SpreadsheetApp.getActiveSpreadsheet();
+      const workBook = getActiveSpreadsheet();
       const number = this.highestBackupNumber + 1;
 
       this.sheet
