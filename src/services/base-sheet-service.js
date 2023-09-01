@@ -22,6 +22,7 @@ const getBackupName = (
 ) => [sheetName, postfix, number].join(separator);
 
 const hasData = (arr = []) => arr.some((v) => !!v);
+const justLetters = (str) => str.toLowerCase().replace(/[^a-z]/g, "");
 
 const BaseSheetServiceFactory = stampit({
   // #region PROPERTIES
@@ -158,10 +159,8 @@ const BaseSheetServiceFactory = stampit({
      * @this {BaseSheetService}
      */
     sortByColumn({ columnName, ascending = true }) {
-      const column =
-        this.headers
-          .map((h) => String(this.headers).toLocaleLowerCase())
-          .indexOf(columnName.toLocaleLowerCase()) + 1;
+      const headers = this.headers.map(justLetters);
+      const column = headers.indexOf(justLetters(columnName)) + 1;
       this.sortSheet({ column, ascending });
     },
     backup() {
