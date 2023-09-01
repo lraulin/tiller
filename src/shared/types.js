@@ -27,6 +27,7 @@ import CategoryType from "../models/category-type-enum.js";
  * @property {Function} load - Loads the data from the Google Sheet into the `data` property.
  * @property {Function} save - Saves the `data` back into the Google Sheet.
  * @property {Function} sortSheet - Sorts the Google Sheet based on a given sort specification object.
+ * @property {Function} getRange - Gets a range of cells from the sheet. Defaults to the entire sheet excluding headers.
  */
 
 /**@type {BaseSheetService} */
@@ -66,7 +67,7 @@ export let BaseSheetService;
  * @property {Function} getTransactionByTimeUnit - Gets the transactions by time unit.
  * @property {Function} getSpendingReportData - Gets the spending report data.
  * @property {Function} getById - Gets a transaction by ID.
- * @property {function({ unit: string; string: string; }): void} generateSpendingReport - Generates the spending report.
+ * @property {function({ unit: string; sheetName: string; }): void} generateSpendingReport - Generates the spending report.
  */
 
 /**@type {TransactionService} */

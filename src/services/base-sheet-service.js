@@ -98,6 +98,7 @@ const BaseSheetServiceFactory = stampit({
     },
 
     /**
+     * Loads data from sheet into memory
      * @this {BaseSheetService}
      */
     load() {
@@ -112,6 +113,8 @@ const BaseSheetServiceFactory = stampit({
     },
 
     /**
+     * Writes in-memory data to sheet
+     *
      * @this {BaseSheetService}
      */
     save() {
@@ -128,7 +131,7 @@ const BaseSheetServiceFactory = stampit({
     /**
      * Gets a range of cells from the sheet. Defaults to the entire sheet
      * excluding headers.
-     *
+     * @this {BaseSheetService}
      * @returns {GoogleAppsScript.Spreadsheet.Range}
      */
     getRange({
@@ -140,9 +143,7 @@ const BaseSheetServiceFactory = stampit({
       if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       return this.sheet.getRange(startRow, startColumn, numRows, numColumns);
     },
-    /**
-     * @this {BaseSheetService}
-     */
+    /** @this {BaseSheetService} */
     sortSheet(sortSpecObj) {
       if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       const range = this.sheet.getRange(
@@ -155,15 +156,16 @@ const BaseSheetServiceFactory = stampit({
       this.load();
     },
 
-    /**
-     * @this {BaseSheetService}
-     */
+    /** @this {BaseSheetService} */
     sortByColumn({ columnName, ascending = true }) {
       const headers = this.headers.map(justLetters);
       const column = headers.indexOf(justLetters(columnName)) + 1;
       this.sortSheet({ column, ascending });
     },
+    /** @this {BaseSheetService} */
     backup() {
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+
       const workBook = SpreadsheetApp.getActiveSpreadsheet();
       const number = this.highestBackupNumber + 1;
 
@@ -171,7 +173,10 @@ const BaseSheetServiceFactory = stampit({
         .copyTo(workBook)
         .setName(getBackupName(this.sheetName, number));
     },
+    /** @this {BaseSheetService} */
     restore() {
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+
       const originalSheet = this.sheet;
       const backupName = getBackupName(
         this.sheetName,

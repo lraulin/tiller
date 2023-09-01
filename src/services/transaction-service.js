@@ -119,12 +119,9 @@ const TransactionServiceFactory = stampit(BaseSheetService, {
 
     /**@this {TransactionService} */
     generateAllReports() {
-      const params = [
-        { unit: "day", string: "Daily" },
-        { unit: "week", string: "Weekly" },
-        { unit: "month", string: "Monthly" },
-      ];
-      params.forEach(this.generateSpendingReport);
+      this.generateSpendingReport({ unit: "day", sheetName: "Daily" });
+      this.generateSpendingReport({ unit: "week", sheetName: "Weekly" });
+      this.generateSpendingReport({ unit: "month", sheetName: "Monthly" });
     },
 
     /**@this {TransactionService} */
