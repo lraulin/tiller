@@ -22,13 +22,17 @@ const DirectExpressServiceFactory = stampit(BaseSheetServiceFactory, {
       this.data = Object.values(lookup);
       this.data.sort(
         (a, b) =>
-          (b.date?.getTime() ?? Number.MAX_SAFE_INTEGER) -
-          (a.date?.getTime() || Number.MAX_SAFE_INTEGER)
+          (b.date?.getTime?.() || Number.MAX_SAFE_INTEGER) -
+          (a.date?.getTime?.() || Number.MAX_SAFE_INTEGER)
       );
       const dupsRemoved = startedWith - this.data.length;
       Logger.log("Removed " + dupsRemoved + " duplicate transactions");
       this.save();
+      this.sortByDate();
       this.load();
+    },
+    sortByDate() {
+      this.sortByColumn({ column: "date", ascending: false });
     },
   }, // #endregion METHODS
 });
