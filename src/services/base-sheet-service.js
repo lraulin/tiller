@@ -66,6 +66,16 @@ const BaseSheetServiceFactory = stampit({
         .map((h) => String(h).trim());
     },
 
+    get numColumns() {
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+      return this.sheet.getLastColumn();
+    },
+
+    get lastRow() {
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+      return this.sheet.getLastRow();
+    },
+
     /** @this {BaseSheetService} */
     get highestBackupNumber() {
       const sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
@@ -106,23 +116,29 @@ const BaseSheetServiceFactory = stampit({
     save() {
       Logger.log("Saving data to " + this.sheetName + " sheet");
       if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      const lastRow = this.sheet.getLastRow();
-      const rangeToOverwrite = this.sheet.getRange(
-        2,
-        1,
-        lastRow - 1,
-        this.sheet.getLastColumn()
-      );
 
-      rangeToOverwrite.clearContent();
+      this.getRange().clearContent();
 
       const rows = this.data.map((t) => t.toArray());
       Logger.log(rows);
-      this.sheet
-        .getRange(lastRow + 1, 1, rows.length, rows[0].length)
-        .setValues(rows);
+      this.getRange({ numRows: rows.length }).setValues(rows);
     },
 
+    /**
+     * Gets a range of cells from the sheet. Defaults to the entire sheet
+     * excluding headers.
+     *
+     * @returns {GoogleAppsScript.Spreadsheet.Range}
+     */
+    getRange({
+      startRow = 2,
+      startColumn = 1,
+      numRows = this.lastRow,
+      numColumns = this.numColumns,
+    } = {}) {
+      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+      return this.sheet.getRange(startRow, startColumn, numRows, numColumns);
+    },
     /**
      * @this {BaseSheetService}
      */
