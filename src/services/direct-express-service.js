@@ -28,7 +28,7 @@ const DirectExpressServiceFactory = stampit(BaseSheetServiceFactory, {
       const dupsRemoved = startedWith - this.data.length;
       Logger.log("Removed " + dupsRemoved + " duplicate transactions");
       this.save();
-      this.sortByDate();
+      // this.sortByDate();
       this.load();
     },
     sortByDate() {

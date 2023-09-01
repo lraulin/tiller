@@ -21,6 +21,8 @@ const getBackupName = (
   separator = "_"
 ) => [sheetName, postfix, number].join(separator);
 
+const hasData = (arr = []) => arr.some((v) => !!v);
+
 const BaseSheetServiceFactory = stampit({
   // #region PROPERTIES
   props: {
@@ -92,7 +94,7 @@ const BaseSheetServiceFactory = stampit({
       if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
       if (this.model === null) throw new InitializationError(ERR_MSG_NO_MODEL);
 
-      const [, ...rows] = this.sheet.getDataRange().getValues();
+      const [, ...rows] = this.sheet.getDataRange().getValues().filter(hasData);
       this.data = rows.map((row) => this.model?.(row));
       Logger.log("Loaded " + this.data.length + " rows");
       Logger.log(this.data);
