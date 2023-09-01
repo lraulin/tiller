@@ -7,20 +7,12 @@ module.exports = {
   output: {
     filename: "Code.gs",
     path: path.resolve(__dirname, "dist"),
-    // libraryTarget: "var",
-    // library: "onOpen",
   },
   module: {
     rules: [
       {
         test: /\.(?:js|mjs|cjs)$/,
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: [["@babel/preset-env", { targets: "defaults" }]],
-          },
-        },
       },
     ],
   },

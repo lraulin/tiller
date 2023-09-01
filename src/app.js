@@ -1,43 +1,8 @@
-import { TimeUnit } from "./categories/types.js";
-import directExpress from "./direct-express/index.js";
-import { getSpendingData } from "./core.js";
-import sheets from "./sheets/index.js";
-import transactions from "./transactions/index.js";
+import masterService from "./services/master-service.js";
 
-/**
- * @typedef {object} SpendingTableParams
- * @property {TimeUnit} unit
- * @property {string} string
- */
-
-/**
- * @param {SpendingTableParams} param0
- */
-function fillSpendingTable({ unit, string }) {
-  const data = getSpendingData({
-    transactions: transactions.getExpenses(),
-    lastDate: new Date(),
-    unit,
-  });
-  const sheet = sheets.get(string);
-  sheet.clearContents();
-  sheets.append(sheet, data);
-}
-
-function fillSpendingTables() {
-  /**@type {SpendingTableParams[]} */
-  const params = [
-    { unit: "day", string: "Daily" },
-    { unit: "week", string: "Weekly" },
-    { unit: "month", string: "Monthly" },
-  ];
-  params.forEach(fillSpendingTable);
-}
-
-export function fillCustomSheets() {
-  fillSpendingTables();
-  transactions.importDirectExpress();
-}
+Logger.log(`src/app.js`);
+Logger.log("masterService");
+Logger.log(masterService);
 
 export function onOpen() {
   const ui = SpreadsheetApp.getUi();
@@ -55,13 +20,17 @@ export function onOpen() {
 // Gas plugin needs assignments to "global" to create top-level functions...
 const global = {};
 global.onOpen = onOpen;
-global.fillCustomSheets = fillCustomSheets;
-global.importDirectExpress = transactions.importDirectExpress;
-global.sortTransactions = transactions.sort;
-global.cleanUpDirectExpress = directExpress.cleanUp;
-global.backupTransactions = transactions.backup;
-global.restoreTransactions = transactions.restore;
-global.clearAllBackups = sheets.clearAllBackups;
+global.fillCustomSheets = masterService.generateReports.bind(masterService);
+global.importDirectExpress =
+  masterService.importDirectExpressToTransactions.bind(masterService);
+global.sortTransactions = masterService.sortTransactions.bind(masterService);
+global.cleanUpDirectExpress =
+  masterService.cleanUpDirectExpress.bind(masterService);
+global.backupTransactions =
+  masterService.backupTransactions.bind(masterService);
+global.restoreTransactions =
+  masterService.restoreTransactions.bind(masterService);
+global.clearAllBackups = masterService.clearAllBackups.bind(masterService);
 
 // But "global" is no longer available in GAS; globalThis works instead
 // https://developers.google.com/apps-script/guides/v8-runtime/migration#global

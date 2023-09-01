@@ -17,6 +17,6 @@
     "test/**/*.js",
     "src/direct-express/main.js",
     "src/categories/main.js",
-    "src/sheets/main.js"
+    "src/util/sheet-helpers.js"
   ]
 }
