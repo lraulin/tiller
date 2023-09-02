@@ -2,19 +2,16 @@ import { InitializationError, SheetError } from "../shared/errors.js";
 
 import { BACKUP_POSTFIX } from "../shared/constants.js";
 import { BaseSheetService } from "../shared/types.js";
-import stampit from "stampit";
-import { toCamelCase } from "../shared/strings.js";
 
+// Constants
 const ERR_MSG_NO_SHEET = ": sheet not found";
 const ERR_MSG_NO_MODEL = ": missing data model";
 
-/**
- *
- * @param {string} sheetName
- * @param {string} postfix
- * @param {number} number
- * @returns
- */
+// Helpers
+const { getActiveSpreadsheet } = SpreadsheetApp;
+const getSheetByName = (sheetName) =>
+  getActiveSpreadsheet().getSheetByName(sheetName);
+const getSheets = () => getActiveSpreadsheet().getSheets();
 const getBackupName = (
   sheetName,
   number,
@@ -25,66 +22,141 @@ const getBackupName = (
 const hasData = (arr = []) => arr.some((v) => !!v);
 const justLetters = (str) => str.toLowerCase().replace(/[^a-z]/g, "");
 
-// Google Sheets API Helpers
-const { getActiveSpreadsheet, getUi } = SpreadsheetApp;
-const getSheetByName = (sheetName) =>
-  getActiveSpreadsheet().getSheetByName(sheetName);
-const getSheets = () => getActiveSpreadsheet().getSheets();
-const alert = (msg) => getUi().alert(msg);
+const BaseSheetServiceFactory = ({ sheet, sheetName }) => {
+  let data = [];
+  const sheet = getSheetByName(sheetName);
+  if (!sheet)
+    throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
 
-const BaseSheetServiceFactory = stampit({
-  // #region PROPERTIES
-  props: {
-    sheet: null,
-    sheetName: "",
-    model: null,
-    data: [],
-  }, // #endregion PROPERTIES
+  Logger.log("BaseSheetServiceFactory.init");
+  Logger.log("sheetName: " + sheetName);
+  load();
 
-  // #region INIT
+  //#endregion PRIVATE PROPERTIES
+  /**
+   *
+   * @param {string} sheetName
+   * @param {string} postfix
+   * @param {number} number
+   * @returns
+   */
 
   /**
-   * @this {BaseSheetService}
-   * @param {Object} param0
-   * @param {string} param0.sheetName
-   * @param {Function} param0.model
+   * Loads data from sheet into memory
    */
-  init({ sheetName, model }) {
-    Logger.log("BaseSheetServiceFactory.init");
-    Logger.log("sheetName: " + sheetName);
-    Logger.log("model: " + model);
-    this.sheetName = sheetName;
-    this.sheet = getSheetByName(sheetName);
-    if (!this.sheet)
-      throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
-    this.model = model;
-    this.load();
-  }, // #endregion INIT
+  function load() {
+    Logger.log("Loading data from " + sheetName + " sheet");
+    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+    if (model === null) throw new InitializationError(ERR_MSG_NO_MODEL);
 
-  // #region METHODS
-  methods: {
-    /**
-     * @this {BaseSheetService}
-     */
+    const [, ...rows] = sheet.getDataRange().getValues().filter(hasData);
+    data = rows.map((row) => model?.(row));
+    Logger.log("Loaded " + data.length + " rows");
+    Logger.log(data);
+  }
+
+  /**
+   * Writes in-memory data to sheet
+   *
+   * @this {BaseSheetService}
+   */
+  function save() {
+    Logger.log("Saving data to " + sheetName + " sheet");
+    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+
+    getRange().clearContent();
+
+    const rows = data.map((t) => t.toArray());
+    Logger.log(rows);
+    getRange({ numRows: rows.length }).setValues(rows);
+  }
+
+  /**
+   * Gets a range of cells from the sheet. Defaults to the entire sheet
+   * excluding headers.
+   * @this {BaseSheetService}
+   * @returns {GoogleAppsScript.Spreadsheet.Range}
+   */
+  function getRange({
+    startRow = 2,
+    startColumn = 1,
+    numRows = lastRow,
+    numColumns = numColumns,
+  } = {}) {
+    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+    return sheet.getRange(startRow, startColumn, numRows, numColumns);
+  }
+  function sortSheet(sortSpecObj) {
+    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+    const range = sheet.getRange(
+      2,
+      1,
+      sheet.getLastRow() - 1,
+      sheet.getLastColumn()
+    );
+    range.sort(sortSpecObj);
+    load();
+  }
+
+  function sortByColumn({ columnName, ascending = true }) {
+    const headers = headers.map(justLetters);
+    const column = headers.indexOf(justLetters(columnName)) + 1;
+    sortSheet({ column, ascending });
+  }
+
+  function backup() {
+    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+
+    const workBook = getActiveSpreadsheet();
+    const number = highestBackupNumber + 1;
+
+    sheet.copyTo(workBook).setName(getBackupName(sheetName, number));
+  }
+
+  function restore() {
+    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+
+    const originalSheet = sheet;
+    const backupName = getBackupName(sheetName, highestBackupNumber);
+    const backupSheet =
+      SpreadsheetApp.getActiveSpreadsheet().getSheetByName(backupName);
+    if (!backupSheet)
+      throw new SheetError(`Unable to retrieve '${backupName}' sheet`);
+
+    const workBook = SpreadsheetApp.getActiveSpreadsheet();
+    workBook.deleteSheet(originalSheet);
+    backupSheet.copyTo(workBook).setName(sheetName);
+    workBook.deleteSheet(backupSheet);
+  }
+
+  const accessors = {
+    // #region getters
+    get data() {
+      return data;
+    },
+
+    set data(newData) {
+      data = newData;
+    },
+
     get headers() {
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      return this.sheet
-        .getRange(1, 1, 1, this.sheet.getLastColumn())
+      if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+      return sheet
+        .getRange(1, 1, 1, sheet.getLastColumn())
         .getValues()[0]
         .map((h) => String(h).trim());
     },
 
     get numColumns() {
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      return this.sheet.getLastColumn();
+      if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+      return sheet.getLastColumn();
     },
 
     get lastRow() {
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      return this.sheet.getLastRow();
+      if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+      return sheet.getLastRow();
     },
 
-    /** @this {BaseSheetService} */
     get highestBackupNumber() {
       const sheets = getSheets();
       if (!sheets.length) {
@@ -93,7 +165,7 @@ const BaseSheetServiceFactory = stampit({
 
       const sheetNames = sheets.map((sheet) => sheet.getName());
       const backupNumbers = sheetNames
-        .filter((n) => n.includes(this.sheetName))
+        .filter((n) => n.includes(sheetName))
         .map((n) => {
           const match = n.match(/\d+/);
           return match ? parseInt(match[0], 10) : 0;
@@ -103,103 +175,19 @@ const BaseSheetServiceFactory = stampit({
         : 0;
       return backupNumber;
     },
+  };
 
-    /**
-     * Loads data from sheet into memory
-     * @this {BaseSheetService}
-     */
-    load() {
-      Logger.log("Loading data from " + this.sheetName + " sheet");
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      if (this.model === null) throw new InitializationError(ERR_MSG_NO_MODEL);
+  const publicMethods = {
+    load,
+    save,
+    getRange,
+    sortSheet,
+    sortByColumn,
+    backup,
+    restore,
+  };
 
-      const [, ...rows] = this.sheet.getDataRange().getValues().filter(hasData);
-      this.data = rows.map((row) => this.model?.(row));
-      Logger.log("Loaded " + this.data.length + " rows");
-      Logger.log(this.data);
-    },
-
-    /**
-     * Writes in-memory data to sheet
-     *
-     * @this {BaseSheetService}
-     */
-    save() {
-      Logger.log("Saving data to " + this.sheetName + " sheet");
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-
-      this.getRange().clearContent();
-
-      const rows = this.data.map((t) => t.toArray());
-      Logger.log(rows);
-      this.getRange({ numRows: rows.length }).setValues(rows);
-    },
-
-    /**
-     * Gets a range of cells from the sheet. Defaults to the entire sheet
-     * excluding headers.
-     * @this {BaseSheetService}
-     * @returns {GoogleAppsScript.Spreadsheet.Range}
-     */
-    getRange({
-      startRow = 2,
-      startColumn = 1,
-      numRows = this.lastRow,
-      numColumns = this.numColumns,
-    } = {}) {
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      return this.sheet.getRange(startRow, startColumn, numRows, numColumns);
-    },
-    /** @this {BaseSheetService} */
-    sortSheet(sortSpecObj) {
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      const range = this.sheet.getRange(
-        2,
-        1,
-        this.sheet.getLastRow() - 1,
-        this.sheet.getLastColumn()
-      );
-      range.sort(sortSpecObj);
-      this.load();
-    },
-
-    /** @this {BaseSheetService} */
-    sortByColumn({ columnName, ascending = true }) {
-      const headers = this.headers.map(justLetters);
-      const column = headers.indexOf(justLetters(columnName)) + 1;
-      this.sortSheet({ column, ascending });
-    },
-    /** @this {BaseSheetService} */
-    backup() {
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-
-      const workBook = getActiveSpreadsheet();
-      const number = this.highestBackupNumber + 1;
-
-      this.sheet
-        .copyTo(workBook)
-        .setName(getBackupName(this.sheetName, number));
-    },
-    /** @this {BaseSheetService} */
-    restore() {
-      if (!this.sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-
-      const originalSheet = this.sheet;
-      const backupName = getBackupName(
-        this.sheetName,
-        this.highestBackupNumber
-      );
-      const backupSheet =
-        SpreadsheetApp.getActiveSpreadsheet().getSheetByName(backupName);
-      if (!backupSheet)
-        throw new SheetError(`Unable to retrieve '${backupName}' sheet`);
-
-      const workBook = SpreadsheetApp.getActiveSpreadsheet();
-      workBook.deleteSheet(originalSheet);
-      backupSheet.copyTo(workBook).setName(this.sheetName);
-      workBook.deleteSheet(backupSheet);
-    },
-  }, // #endregion METHODS
-});
+  return { ...accessors, ...publicMethods };
+};
 
 export default BaseSheetServiceFactory;
