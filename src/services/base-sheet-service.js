@@ -1,13 +1,9 @@
 import { InitializationError, SheetError } from "../shared/errors.js";
 
 import { BACKUP_POSTFIX } from "../shared/constants.js";
-import { BaseSheetService } from "../shared/types.js";
 
-// Constants
 const ERR_MSG_NO_SHEET = ": sheet not found";
-const ERR_MSG_NO_MODEL = ": missing data model";
 
-// Helpers
 const { getActiveSpreadsheet } = SpreadsheetApp;
 const getSheetByName = (sheetName) =>
   getActiveSpreadsheet().getSheetByName(sheetName);
@@ -22,8 +18,9 @@ const getBackupName = (
 const hasData = (arr = []) => arr.some((v) => !!v);
 const justLetters = (str) => str.toLowerCase().replace(/[^a-z]/g, "");
 
-const BaseSheetServiceFactory = ({ sheet, sheetName }) => {
+const BaseSheetServiceFactory = ({ sheetName }) => {
   let data = [];
+  let headers = [];
   const sheet = getSheetByName(sheetName);
   if (!sheet)
     throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
@@ -47,19 +44,13 @@ const BaseSheetServiceFactory = ({ sheet, sheetName }) => {
   function load() {
     Logger.log("Loading data from " + sheetName + " sheet");
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-    if (model === null) throw new InitializationError(ERR_MSG_NO_MODEL);
 
-    const [, ...rows] = sheet.getDataRange().getValues().filter(hasData);
-    data = rows.map((row) => model?.(row));
+    const [, ...loadedData] = sheet.getDataRange().getValues().filter(hasData);
+    data = loadedData;
     Logger.log("Loaded " + data.length + " rows");
     Logger.log(data);
   }
 
-  /**
-   * Writes in-memory data to sheet
-   *
-   * @this {BaseSheetService}
-   */
   function save() {
     Logger.log("Saving data to " + sheetName + " sheet");
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
@@ -71,12 +62,6 @@ const BaseSheetServiceFactory = ({ sheet, sheetName }) => {
     getRange({ numRows: rows.length }).setValues(rows);
   }
 
-  /**
-   * Gets a range of cells from the sheet. Defaults to the entire sheet
-   * excluding headers.
-   * @this {BaseSheetService}
-   * @returns {GoogleAppsScript.Spreadsheet.Range}
-   */
   function getRange({
     startRow = 2,
     startColumn = 1,
@@ -130,21 +115,17 @@ const BaseSheetServiceFactory = ({ sheet, sheetName }) => {
   }
 
   const accessors = {
-    // #region getters
     get data() {
-      return data;
+      return [...data];
     },
 
     set data(newData) {
-      data = newData;
+      data = [...newData];
     },
 
     get headers() {
       if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-      return sheet
-        .getRange(1, 1, 1, sheet.getLastColumn())
-        .getValues()[0]
-        .map((h) => String(h).trim());
+      return headers;
     },
 
     get numColumns() {

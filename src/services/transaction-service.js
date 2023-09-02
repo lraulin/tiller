@@ -5,81 +5,71 @@ import {
   transactionsByDateDescending,
 } from "../shared/dates.js";
 
-import BaseSheetService from "./base-sheet-service.js";
+import BaseSheetServiceFactory from "./base-sheet-service.js";
 import Transaction from "../models/transaction.js";
-import { TransactionService } from "../shared/types.js";
-import stampit from "stampit";
 
 const sumTransactions = (transactions) =>
   transactions.reduce((a, c) => a + c.amount, 0);
 
-const TransactionServiceFactory = stampit(BaseSheetService, {
-  methods: {
-    /**@this {TransactionService} */
+const TransactionServiceFactory = () => {
+  const base = BaseSheetServiceFactory({ sheetName: "Transactions" });
+  base.data = base.data.map((row) => Transaction(row));
+
+  const methods = {
     get expenses() {
-      return this.data.filter((t) => t.isExpense);
+      return base.data.filter((t) => t.isExpense);
     },
 
-    /**@this {TransactionService} */
     get income() {
-      return this.data.filter((t) => t.isIncome);
+      return base.data.filter((t) => t.isIncome);
     },
 
-    /**@this {TransactionService} */
     get firstTransactionDate() {
       const timeStamp = Math.min(
-        ...this.data.map((t) => t.date?.getTime() || Number.MAX_SAFE_INTEGER)
+        ...base.data.map((t) => t.date?.getTime() || Number.MAX_SAFE_INTEGER)
       );
       return new Date(timeStamp);
     },
 
-    /**@this {TransactionService} */
     get lastTransactionDate() {
       const timeStamp = Math.max(
-        ...this.data.map((t) => t.date?.getTime() || 0)
+        ...base.data.map((t) => t.date?.getTime() || 0)
       );
       return new Date(timeStamp);
     },
 
-    /**@this {TransactionService} */
     get lastNonPendingFromDirectExpress() {
       // sort
-      return this.data.filter(
+      return base.data.filter(
         (t) => t.isFromDirectExpress && !t.isPending
       )?.[0];
     },
 
-    /**@this {TransactionService} */
     get pendingTransactions() {
-      return [...this.data.filter((t) => t.isPending)];
+      return [...base.data.filter((t) => t.isPending)];
     },
 
-    /**@this {TransactionService} */
     get nonPendingTransactions() {
-      return [...this.data.filter((t) => !t.isPending)];
+      return [...base.data.filter((t) => !t.isPending)];
     },
 
-    /**@this {TransactionService} */
     sortByDateDescending() {
-      this.data.sort(transactionsByDateDescending);
+      base.data.sort(transactionsByDateDescending);
     },
 
-    /**@this {TransactionService} */
     getTransactionInDateRange(start = undefined, stop = undefined) {
       const startDate = start ?? this.firstTransactionDate;
       const stopDate = stop ?? this.lastTransactionDate;
-      return this.data.filter(
+      return base.data.filter(
         (t) => t.date !== null && t.date >= startDate && t.date <= stopDate
       );
     },
 
-    /**@this {TransactionService} */
     getTransactionByTimeUnit(unit, date) {
       const areSameUnit = areSame(unit);
-      return this.data.filter((t) => areSameUnit(t.date, date));
+      return base.data.filter((t) => areSameUnit(t.date, date));
     },
 
-    /**@this {TransactionService} */
     getSpendingReportData({
       unit,
       lastDate,
@@ -101,7 +91,6 @@ const TransactionServiceFactory = stampit(BaseSheetService, {
       });
     },
 
-    /**@this {TransactionService} */
     generateSpendingReport({ unit, sheetName }) {
       const data = this.getSpendingReportData({
         lastDate: new Date(),
@@ -117,14 +106,12 @@ const TransactionServiceFactory = stampit(BaseSheetService, {
         .setValues(data);
     },
 
-    /**@this {TransactionService} */
     generateAllReports() {
       this.generateSpendingReport({ unit: "day", sheetName: "Daily" });
       this.generateSpendingReport({ unit: "week", sheetName: "Weekly" });
       this.generateSpendingReport({ unit: "month", sheetName: "Monthly" });
     },
 
-    /**@this {TransactionService} */
     updateFromDirectExpress(newTransactions) {
       // Preserve category of pending transactions while replacing old with new.
       const pendingIds = this.pendingTransactions.map((t) => t.transactionId);
@@ -141,15 +128,11 @@ const TransactionServiceFactory = stampit(BaseSheetService, {
         }
         return t;
       });
-      this.data = [...this.nonPendingTransactions, ...transactionsToAdd];
+      base = [...this.nonPendingTransactions, ...transactionsToAdd];
     },
-  },
-});
+  };
 
-/** @type {TransactionService} */
-const service = TransactionServiceFactory({
-  sheetName: "Transactions",
-  model: Transaction,
-});
-const getTransactionService = () => service;
-export default getTransactionService;
+  return { ...base, ...methods };
+};
+
+export default TransactionServiceFactory();
