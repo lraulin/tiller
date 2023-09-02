@@ -17,41 +17,67 @@ const getBackupName = (
 
 const hasData = (arr = []) => arr.some((v) => !!v);
 const justLetters = (str) => str.toLowerCase().replace(/[^a-z]/g, "");
+function camelize(str) {
+  return str
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    })
+    .replace(/\s+/g, "");
+}
 
 const BaseSheetServiceFactory = ({ sheetName }) => {
   let data = [];
   let headers = [];
+  let camelHeaders = [];
   const sheet = getSheetByName(sheetName);
   if (!sheet)
     throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
 
   Logger.log("BaseSheetServiceFactory.init");
   Logger.log("sheetName: " + sheetName);
-  load();
-
-  //#endregion PRIVATE PROPERTIES
-  /**
-   *
-   * @param {string} sheetName
-   * @param {string} postfix
-   * @param {number} number
-   * @returns
-   */
 
   /**
    * Loads data from sheet into memory
    */
-  function load() {
+  const load = () => {
     Logger.log("Loading data from " + sheetName + " sheet");
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
 
     const [, ...loadedData] = sheet.getDataRange().getValues().filter(hasData);
-    data = loadedData;
     Logger.log("Loaded " + data.length + " rows");
     Logger.log(data);
-  }
+    data = loadedData;
+  };
 
-  function save() {
+  load();
+  if (!data.length) {
+    Logger.log("Something went wrong...");
+    Logger.log("Failed to load data from sheet " + sheetName);
+    throw new Error("Failed to load data from sheet " + sheetName);
+  }
+  Logger.log(
+    data.map((r) => {
+      return r.map((c) => {
+        return typeof c;
+      });
+    })
+  );
+
+  const load2 = () => {
+    const [theseHeaders, ...rows] = sheet
+      .getDataRange()
+      .getValues()
+      .filter(hasData);
+    headers = theseHeaders;
+    camelHeaders = theseHeaders.map((h) => camelize(h));
+    const data = rows.map((r) =>
+      r.reduce((a, c, i) => {
+        a[camelHeaders[i]] = c;
+      }, {})
+    );
+  };
+
+  const save = () => {
     Logger.log("Saving data to " + sheetName + " sheet");
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
 
@@ -60,17 +86,29 @@ const BaseSheetServiceFactory = ({ sheetName }) => {
     const rows = data.map((t) => t.toArray());
     Logger.log(rows);
     getRange({ numRows: rows.length }).setValues(rows);
-  }
+  };
 
-  function getRange({
+  const save2 = () => {
+    const rows = data.map((obj) =>
+      camelHeaders.reduce((acc, header, i) => {
+        acc[i] = obj[header];
+        return acc;
+      }, Array(camelHeaders.length).fill(""))
+    );
+    getRange().clearContent();
+
+    getRange({ numRows: rows.length }).setValues(rows);
+  };
+
+  const getRange = ({
     startRow = 2,
     startColumn = 1,
     numRows = lastRow,
     numColumns = numColumns,
-  } = {}) {
+  } = {}) => {
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
     return sheet.getRange(startRow, startColumn, numRows, numColumns);
-  }
+  };
   function sortSheet(sortSpecObj) {
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
     const range = sheet.getRange(
@@ -83,22 +121,22 @@ const BaseSheetServiceFactory = ({ sheetName }) => {
     load();
   }
 
-  function sortByColumn({ columnName, ascending = true }) {
+  const sortByColumn = ({ columnName, ascending = true }) => {
     const headers = headers.map(justLetters);
     const column = headers.indexOf(justLetters(columnName)) + 1;
     sortSheet({ column, ascending });
-  }
+  };
 
-  function backup() {
+  const backup = () => {
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
 
     const workBook = getActiveSpreadsheet();
     const number = highestBackupNumber + 1;
 
     sheet.copyTo(workBook).setName(getBackupName(sheetName, number));
-  }
+  };
 
-  function restore() {
+  const restore = () => {
     if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
 
     const originalSheet = sheet;
@@ -112,7 +150,7 @@ const BaseSheetServiceFactory = ({ sheetName }) => {
     workBook.deleteSheet(originalSheet);
     backupSheet.copyTo(workBook).setName(sheetName);
     workBook.deleteSheet(backupSheet);
-  }
+  };
 
   const accessors = {
     get data() {

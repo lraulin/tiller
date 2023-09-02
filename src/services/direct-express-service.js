@@ -5,6 +5,8 @@ import DirectExpressTransactionFactory from "../models/direct-express-transactio
 const DirectExpressServiceFactory = () => {
   const base = BaseSheetServiceFactory({ sheetName: "DirectExpress" });
   base.data = base.data.map((row) => DirectExpressTransactionFactory(row));
+  Logger.log("Wrapping transactions");
+  Logger.log(base.data);
 
   const methods = {
     getNewTransactions(lastId) {

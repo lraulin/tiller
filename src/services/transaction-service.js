@@ -14,6 +14,8 @@ const sumTransactions = (transactions) =>
 const TransactionServiceFactory = () => {
   const base = BaseSheetServiceFactory({ sheetName: "Transactions" });
   base.data = base.data.map((row) => Transaction(row));
+  Logger.log("Wrapping transactions");
+  Logger.log(base.data);
 
   const methods = {
     get expenses() {
@@ -26,14 +28,14 @@ const TransactionServiceFactory = () => {
 
     get firstTransactionDate() {
       const timeStamp = Math.min(
-        ...base.data.map((t) => t.date?.getTime() || Number.MAX_SAFE_INTEGER)
+        ...base.data.map((t) => t.date?.getTime?.() || Number.MAX_SAFE_INTEGER)
       );
       return new Date(timeStamp);
     },
 
     get lastTransactionDate() {
       const timeStamp = Math.max(
-        ...base.data.map((t) => t.date?.getTime() || 0)
+        ...base.data.map((t) => t.date?.getTime?.() || 0)
       );
       return new Date(timeStamp);
     },
