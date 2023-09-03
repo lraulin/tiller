@@ -12,6 +12,23 @@ export class InitializationError extends Error {
 export class SheetError extends Error {
   constructor(message) {
     super(message);
-    this.name = "InitializationError";
+    this.name = "SheetError";
   }
 }
+
+// For when a function is missing an argument that has a default,
+// but the default was only provided for type hinting and not meant
+// to be used.
+export function DefaultArgumentError(message = "") {
+  const errorMessage =
+    "The default argument was only for documentation and type inference! " +
+    message;
+  Error.call(this, errorMessage);
+  this.name = "DefaultArgumentError";
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, DefaultArgumentError);
+  }
+}
+
+DefaultArgumentError.prototype = Object.create(Error.prototype);
+DefaultArgumentError.prototype.constructor = DefaultArgumentError;

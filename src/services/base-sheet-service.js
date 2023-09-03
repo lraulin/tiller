@@ -1,7 +1,7 @@
 import { InitializationError, SheetError } from "../shared/errors.js";
-import { arraysToObjects, camelize } from "../shared/util.js";
 
 import { BACKUP_POSTFIX } from "../shared/constants.js";
+import { BaseRowCreator } from "../models/base-row.js";
 
 const ERR_MSG_NO_SHEET = ": sheet not found";
 
@@ -55,9 +55,8 @@ const BaseSheetServiceFactory = ({ sheetName }) => {
       .getDataRange()
       .getValues()
       .filter(hasData);
-    headers = firstRow;
-    keys = headers.map(camelize);
-    data = rows.map((row) => arraysToObjects(keys, [row]));
+    const rowCreator = BaseRowCreator(firstRow);
+    data = rows.map(rowCreator);
   };
   load();
 

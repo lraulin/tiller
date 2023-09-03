@@ -1,4 +1,4 @@
-import { camelize } from "../shared/strings.js";
+import { camelCase } from "../shared/util.js";
 
 const arraysToObjects = (headers, data) => {
   if (!headers.length) throw new Error("No headers provided");
@@ -19,11 +19,12 @@ const arraysToObjects = (headers, data) => {
 
 const RowManagerPrototype = {
   headers: [],
+  keys: [],
   data: [],
   fromArrays(headers, arrs) {
     const instance = Object.create(RowManagerPrototype);
     instance.headers = headers;
-    const camelHeaders = headers.map(camelize);
+    const camelHeaders = headers.map(camelCase);
     instance.data = arraysToObjects(camelHeaders, arrs);
     return instance;
   },

@@ -15,6 +15,10 @@ const CategoryPrototype = Object.defineProperties(
   }
 );
 
+const makeCategory = (obj) => {
+  return Object.setPrototypeOf(obj, CategoryPrototype);
+};
+
 const CategoryServiceFactory = () => {
   const base = BaseSheetServiceFactory({ sheetName: "Categories" });
   base.data = base.data.map((row) => Category.from(row));
