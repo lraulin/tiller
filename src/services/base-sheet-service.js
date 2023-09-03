@@ -17,13 +17,6 @@ const getBackupName = (
 
 const hasData = (arr = []) => arr.some((v) => !!v);
 const justLetters = (str) => str.toLowerCase().replace(/[^a-z]/g, "");
-function camelize(str) {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-      return index === 0 ? word.toLowerCase() : word.toUpperCase();
-    })
-    .replace(/\s+/g, "");
-}
 
 const BaseSheetServiceFactory = ({ sheetName }) => {
   let data = [];
@@ -55,13 +48,6 @@ const BaseSheetServiceFactory = ({ sheetName }) => {
     Logger.log("Failed to load data from sheet " + sheetName);
     throw new Error("Failed to load data from sheet " + sheetName);
   }
-  Logger.log(
-    data.map((r) => {
-      return r.map((c) => {
-        return typeof c;
-      });
-    })
-  );
 
   const load2 = () => {
     const [theseHeaders, ...rows] = sheet
@@ -69,12 +55,6 @@ const BaseSheetServiceFactory = ({ sheetName }) => {
       .getValues()
       .filter(hasData);
     headers = theseHeaders;
-    camelHeaders = theseHeaders.map((h) => camelize(h));
-    const data = rows.map((r) =>
-      r.reduce((a, c, i) => {
-        a[camelHeaders[i]] = c;
-      }, {})
-    );
   };
 
   const save = () => {
