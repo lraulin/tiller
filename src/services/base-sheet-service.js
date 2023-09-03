@@ -1,4 +1,5 @@
 import { InitializationError, SheetError } from "../shared/errors.js";
+import { arraysToObjects, camelize } from "../shared/util.js";
 
 import { BACKUP_POSTFIX } from "../shared/constants.js";
 
@@ -21,7 +22,7 @@ const justLetters = (str) => str.toLowerCase().replace(/[^a-z]/g, "");
 const BaseSheetServiceFactory = ({ sheetName }) => {
   let data = [];
   let headers = [];
-  let camelHeaders = [];
+  let keys = [];
   const sheet = getSheetByName(sheetName);
   if (!sheet)
     throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
@@ -32,43 +33,46 @@ const BaseSheetServiceFactory = ({ sheetName }) => {
   /**
    * Loads data from sheet into memory
    */
+  // const load = () => {
+  //   Logger.log("Loading data from " + sheetName + " sheet");
+  //   if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+
+  //   const [, ...loadedData] = sheet.getDataRange().getValues().filter(hasData);
+  //   Logger.log("Loaded " + data.length + " rows");
+  //   Logger.log(data);
+  //   data = loadedData;
+  // };
+
+  // load();
+  // if (!data.length) {
+  //   Logger.log("Something went wrong...");
+  //   Logger.log("Failed to load data from sheet " + sheetName);
+  //   throw new Error("Failed to load data from sheet " + sheetName);
+  // }
+
   const load = () => {
-    Logger.log("Loading data from " + sheetName + " sheet");
-    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-
-    const [, ...loadedData] = sheet.getDataRange().getValues().filter(hasData);
-    Logger.log("Loaded " + data.length + " rows");
-    Logger.log(data);
-    data = loadedData;
-  };
-
-  load();
-  if (!data.length) {
-    Logger.log("Something went wrong...");
-    Logger.log("Failed to load data from sheet " + sheetName);
-    throw new Error("Failed to load data from sheet " + sheetName);
-  }
-
-  const load2 = () => {
-    const [theseHeaders, ...rows] = sheet
+    const [firstRow, ...rows] = sheet
       .getDataRange()
       .getValues()
       .filter(hasData);
-    headers = theseHeaders;
+    headers = firstRow;
+    keys = headers.map(camelize);
+    data = rows.map((row) => arraysToObjects(keys, [row]));
   };
+  load();
+
+  // const save = () => {
+  //   Logger.log("Saving data to " + sheetName + " sheet");
+  //   if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
+
+  //   getRange().clearContent();
+
+  //   const rows = data.map((t) => t.toArray());
+  //   Logger.log(rows);
+  //   getRange({ numRows: rows.length }).setValues(rows);
+  // };
 
   const save = () => {
-    Logger.log("Saving data to " + sheetName + " sheet");
-    if (!sheet) throw new InitializationError(ERR_MSG_NO_SHEET);
-
-    getRange().clearContent();
-
-    const rows = data.map((t) => t.toArray());
-    Logger.log(rows);
-    getRange({ numRows: rows.length }).setValues(rows);
-  };
-
-  const save2 = () => {
     const rows = data.map((obj) =>
       camelHeaders.reduce((acc, header, i) => {
         acc[i] = obj[header];

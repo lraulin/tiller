@@ -1,21 +1,36 @@
 import { camelize } from "../shared/strings.js";
 
-const dataToObjects
+const arraysToObjects = (headers, data) => {
+  if (!headers.length) throw new Error("No headers provided");
+  if (!data.length) throw new Error("No data provided");
+  if (headers.length !== data[0].length)
+    throw new Error(
+      "Headers and data length mismatch: " + headers.length + " !== " + data[0]
+    );
+
+  return data.map((row) => {
+    return row.reduce((acc, value, i) => {
+      const key = headers[i];
+      if (key === "") return acc;
+      return { ...acc, [key]: value };
+    }, {});
+  });
+};
 
 const RowManagerPrototype = {
   headers: [],
-  rows: [],
+  data: [],
   fromArrays(headers, arrs) {
     const instance = Object.create(RowManagerPrototype);
     instance.headers = headers;
-    instance.rows = arrs.map((arr) => {
-          camelHeaders = theseHeaders.map((h) => camelize(h));
-    const data = rows.map((r) => {
-      r.reduce((a, c, i) => {
-        a[camelHeaders[i]] = c;
-        return r;
-      }, {});
-      return data;
-    });
+    const camelHeaders = headers.map(camelize);
+    instance.data = arraysToObjects(camelHeaders, arrs);
     return instance;
-},
+  },
+  toArrays() {
+    return [
+      this.headers,
+      ...this.data.map((row) => this.headers.map((header) => row[header])),
+    ];
+  },
+};

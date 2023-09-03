@@ -1,6 +1,20 @@
 import BaseSheetServiceFactory from "./base-sheet-service.js";
 import Category from "../models/category.js";
 
+const CategoryPrototype = Object.defineProperties(
+  {},
+  {
+    isHidden: {
+      get() {
+        return this.hiddenFromReports === "Hidden";
+      },
+      set(value) {
+        this.hiddenFromReports = value ? "Hidden" : "";
+      },
+    },
+  }
+);
+
 const CategoryServiceFactory = () => {
   const base = BaseSheetServiceFactory({ sheetName: "Categories" });
   base.data = base.data.map((row) => Category.from(row));
