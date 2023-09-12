@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "mocha",
-    "build": "rm ./dist/* && cp ./appsscript.json ./dist/ && webpack --mode=production",
+    "build": "cp ./appsscript.json ./dist/ && webpack --mode=production",
     "deploy": "npm run build && clasp push ./dist"
   },
   "author": "",

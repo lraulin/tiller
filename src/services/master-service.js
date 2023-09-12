@@ -117,6 +117,10 @@ const MasterServiceFactory = stampit({
       Logger.log("Deleting" + backups.length + " sheets");
       backups.forEach((b) => workBook.deleteSheet(b));
     },
+
+    generatePenfedIds() {
+      this.transactionService.generatePenFedIds();
+    },
   }, // endregion METHODS
 });
 

@@ -14,6 +14,7 @@ export function onOpen() {
     .addItem("Backup Transactions", "backupTransactions")
     .addItem("Restore Transactions", "restoreTransactions")
     .addItem("Clear All Backups", "clearAllBackups")
+    .addItem("Generate PenFed Ids", "generatePenfedIds")
     .addToUi();
 }
 
@@ -31,6 +32,7 @@ global.backupTransactions =
 global.restoreTransactions =
   masterService.restoreTransactions.bind(masterService);
 global.clearAllBackups = masterService.clearAllBackups.bind(masterService);
+global.generatePenfedIds = masterService.generatePenfedIds.bind(masterService);
 
 // But "global" is no longer available in GAS; globalThis works instead
 // https://developers.google.com/apps-script/guides/v8-runtime/migration#global

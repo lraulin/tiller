@@ -143,6 +143,22 @@ const TransactionServiceFactory = stampit(BaseSheetService, {
       });
       this.data = [...this.nonPendingTransactions, ...transactionsToAdd];
     },
+
+    /**@this {TransactionService} */
+    generatePenFedIds() {
+      this.data = this.data.map((t) => {
+        if (t.isPenFed) {
+          const id =
+            "pf" +
+            t.date.toISOString().slice(0, 10) +
+            t.amount.toFixed(2).replace(".", "") +
+            t.description.slice(0, 3);
+          t.id = id;
+        }
+        return t;
+      });
+      this.save();
+    },
   },
 });
 
