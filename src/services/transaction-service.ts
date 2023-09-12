@@ -5,9 +5,9 @@ import {
   transactionsByDateDescending,
 } from "../shared/dates.js";
 
-import BaseSheetService from "./base-sheet-service.js";
-import Transaction from "../models/transaction.js";
-import { TransactionService } from "../shared/types.js";
+import BaseSheetService from "./base-sheet-service";
+import Transaction from "../models/transaction";
+import { TransactionService } from "../shared/types";
 import stampit from "stampit";
 
 const sumTransactions = (transactions) =>

@@ -1,4 +1,4 @@
-import { DirectExpressTransaction } from "../shared/types.js";
+import { DirectExpressTransaction } from "../shared/types";
 import stampit from "stampit";
 
 const DirectExpressTransactionFactory = stampit({

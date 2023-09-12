@@ -1,9 +1,9 @@
-import { startOfMonth, startOfWeek } from "../shared/dates.js";
+import { startOfMonth, startOfWeek } from "../shared/dates";
 
-import { DIRECT_EXPRESS } from "../shared/constants.js";
-import { PENDING_DESCRIPTION_PREFIX } from "../shared/constants.js";
-import { Transaction } from "../shared/types.js";
-import categoryService from "../services/category-service.js";
+import { DIRECT_EXPRESS } from "../shared/constants";
+import { PENDING_DESCRIPTION_PREFIX } from "../shared/constants";
+import { Transaction } from "../shared/types";
+import categoryService from "../services/category-service";
 import stampit from "stampit";
 
 const columns = Object.freeze({

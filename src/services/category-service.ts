@@ -1,7 +1,7 @@
-import BaseSheetServiceFactory from "./base-sheet-service.js";
-import CategoryFactory from "../models/category.js";
-import { CategoryService } from "../shared/types.js";
-import { InitializationError } from "../shared/errors.js";
+import BaseSheetServiceFactory from "./base-sheet-service";
+import CategoryFactory from "../models/category";
+import { CategoryService } from "../shared/types";
+import { InitializationError } from "../shared/errors";
 import stampit from "stampit";
 
 const CategoryServiceFactory = stampit(BaseSheetServiceFactory, {

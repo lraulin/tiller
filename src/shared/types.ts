@@ -1,4 +1,4 @@
-import CategoryType from "../models/category-type-enum.js";
+import CategoryType from "../models/category-type-enum";
 
 /**
  * This is super-unmaintainable, but it's a temporary solution to force type hinting to

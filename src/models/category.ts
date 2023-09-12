@@ -1,4 +1,4 @@
-import CategoryType from "../models/category-type-enum.js";
+import CategoryType from "../models/category-type-enum";
 import stampit from "stampit";
 
 const columns = Object.freeze({

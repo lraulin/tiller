@@ -1,9 +1,9 @@
-import { InitializationError, SheetError } from "../shared/errors.js";
+import { InitializationError, SheetError } from "../shared/errors";
 
-import { BACKUP_POSTFIX } from "../shared/constants.js";
-import { BaseSheetService } from "../shared/types.js";
+import { BACKUP_POSTFIX } from "../shared/constants";
+import { BaseSheetService } from "../shared/types";
 import stampit from "stampit";
-import { toCamelCase } from "../shared/strings.js";
+import { toCamelCase } from "../shared/strings";
 
 const ERR_MSG_NO_SHEET = ": sheet not found";
 const ERR_MSG_NO_MODEL = ": missing data model";

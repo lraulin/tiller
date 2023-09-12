@@ -1,10 +1,10 @@
-import { DirectExpressService, TransactionService } from "../shared/types.js";
+import { DirectExpressService, TransactionService } from "../shared/types";
 
-import { BACKUP_POSTFIX } from "../shared/constants.js";
-import { InitializationError } from "../shared/errors.js";
-import { MasterService } from "../shared/types.js";
-import getDirectExpressService from "./direct-express-service.js";
-import getTransactionService from "./transaction-service.js";
+import { BACKUP_POSTFIX } from "../shared/constants";
+import { InitializationError } from "../shared/errors";
+import { MasterService } from "../shared/types";
+import getDirectExpressService from "./direct-express-service";
+import getTransactionService from "./transaction-service";
 import stampit from "stampit";
 
 const ERR_MSG_TRANSACTION_SERVICE_NULL = "transactionService is null";
