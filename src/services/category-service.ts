@@ -1,36 +1,24 @@
-import BaseSheetServiceFactory from "./base-sheet-service";
-import CategoryFactory from "../models/category";
-import { CategoryService } from "../shared/types";
+import BaseSheetService from "./base-sheet-service";
+import Category from "../models/category";
 import { InitializationError } from "../shared/errors";
-import stampit from "stampit";
 
-const CategoryServiceFactory = stampit(BaseSheetServiceFactory, {
-  // #region PROPERTIES
-  props: {
-    lookup: {},
-  }, // #endregion PROPERTIES
+class CategoryService extends BaseSheetService<Category> {
+  lookup: Record<string, Category> = {};
 
-  // #region INIT
-  init() {
+  constructor() {
+    super("Categories", Category);
+
     if (!this.data.length) {
       throw new InitializationError("Categories not loaded");
     }
     this.lookup = this.data.reduce((acc, c) => {
       return { ...acc, [c.name]: c };
     }, {});
-  }, // #endregion INIT
+  }
 
-  // #region METHODS
-  methods: {
-    getCategoryData(categoryName) {
-      return { ...this.lookup[categoryName] };
-    },
-  }, // #endregion METHODS
-});
+  getCategoryData(categoryName) {
+    return { ...this.lookup[categoryName] };
+  }
+}
 
-/**@type {CategoryService} */
-const service = CategoryServiceFactory({
-  sheetName: "Categories",
-  model: CategoryFactory,
-});
-export default service;
+export default new CategoryService();

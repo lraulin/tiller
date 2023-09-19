@@ -1,5 +1,9 @@
 import dayjs from "dayjs";
 
+export const parseDate = (date: string): Date => dayjs(date).toDate();
+export const formatDate = (date: Date): string =>
+  dayjs(date).format("M/D/YYYY");
+
 export const getDateRange = (dateA, dateB, unit) => {
   const start = dayjs(dateA).isBefore(dateB) ? dateA : dateB;
   const stop = dayjs(dateA).isBefore(dateB) ? dateB : dateA;
