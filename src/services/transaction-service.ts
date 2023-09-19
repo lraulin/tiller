@@ -3,7 +3,7 @@ import {
   getDateRange,
   startOf,
   transactionsByDateDescending,
-} from "../shared/dates.js";
+} from "../shared/dates";
 
 import BaseSheetService from "./base-sheet-service";
 import Transaction from "../models/transaction";
