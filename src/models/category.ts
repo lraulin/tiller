@@ -1,5 +1,23 @@
 import Model from "./model";
-import { parseMoney } from "../shared/money";
+
+type CategoryRow = [
+  string, // category
+  string, // group
+  string, // typeName
+  string, // hideFromReports
+  number, // jan2023
+  number, // feb2023
+  number, // mar2023
+  number, // apr2023
+  number, // may2023
+  number, // jun2023
+  number, // jul2023
+  number, // aug2023
+  number, // sep2023
+  number, // oct2023
+  number, // nov2023
+  number // dec2023
+];
 
 const columns = Object.freeze({
   category: 0,
@@ -79,26 +97,26 @@ export default class Category extends Model implements CategoryData {
   };
 
   constructor(categoryData: CategoryData);
-  constructor(row: any[]);
-  constructor(data: CategoryData | string[]) {
+  constructor(row: CategoryRow);
+  constructor(data: CategoryData | CategoryRow) {
     super(data);
     if (Array.isArray(data)) {
       this.name = data[columns.category];
       this.type = getType(data[columns.typeName]);
       this.group = data[columns.group];
       this.isHidden = data[columns.hideFromReports] === "Hidden";
-      this.budget.jan2023 = parseMoney(data[columns.jan2023]);
-      this.budget.feb2023 = parseMoney(data[columns.feb2023]);
-      this.budget.mar2023 = parseMoney(data[columns.mar2023]);
-      this.budget.apr2023 = parseMoney(data[columns.apr2023]);
-      this.budget.may2023 = parseMoney(data[columns.may2023]);
-      this.budget.jun2023 = parseMoney(data[columns.jun2023]);
-      this.budget.jul2023 = parseMoney(data[columns.jul2023]);
-      this.budget.aug2023 = parseMoney(data[columns.aug2023]);
-      this.budget.sep2023 = parseMoney(data[columns.sep2023]);
-      this.budget.oct2023 = parseMoney(data[columns.oct2023]);
-      this.budget.nov2023 = parseMoney(data[columns.nov2023]);
-      this.budget.dec2023 = parseMoney(data[columns.dec2023]);
+      this.budget.jan2023 = data[columns.jan2023];
+      this.budget.feb2023 = data[columns.feb2023];
+      this.budget.mar2023 = data[columns.mar2023];
+      this.budget.apr2023 = data[columns.apr2023];
+      this.budget.may2023 = data[columns.may2023];
+      this.budget.jun2023 = data[columns.jun2023];
+      this.budget.jul2023 = data[columns.jul2023];
+      this.budget.aug2023 = data[columns.aug2023];
+      this.budget.sep2023 = data[columns.sep2023];
+      this.budget.oct2023 = data[columns.oct2023];
+      this.budget.nov2023 = data[columns.nov2023];
+      this.budget.dec2023 = data[columns.dec2023];
       return;
     }
 
@@ -120,24 +138,24 @@ export default class Category extends Model implements CategoryData {
     this.budget.dec2023 = data.budget.dec2023 ?? 0;
   }
 
-  toArray(): string[] {
+  toArray(): CategoryRow {
     return [
       this.name,
       this.type,
       this.group,
       this.isHidden ? "Hidden" : "",
-      this.budget.jan2023.toFixed(2),
-      this.budget.feb2023.toFixed(2),
-      this.budget.mar2023.toFixed(2),
-      this.budget.apr2023.toFixed(2),
-      this.budget.may2023.toFixed(2),
-      this.budget.jun2023.toFixed(2),
-      this.budget.jul2023.toFixed(2),
-      this.budget.aug2023.toFixed(2),
-      this.budget.sep2023.toFixed(2),
-      this.budget.oct2023.toFixed(2),
-      this.budget.nov2023.toFixed(2),
-      this.budget.dec2023.toFixed(2),
+      this.budget.jan2023,
+      this.budget.feb2023,
+      this.budget.mar2023,
+      this.budget.apr2023,
+      this.budget.may2023,
+      this.budget.jun2023,
+      this.budget.jul2023,
+      this.budget.aug2023,
+      this.budget.sep2023,
+      this.budget.oct2023,
+      this.budget.nov2023,
+      this.budget.dec2023,
     ];
   }
 }

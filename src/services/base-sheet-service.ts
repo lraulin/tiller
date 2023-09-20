@@ -36,6 +36,7 @@ export default class BaseSheetService<T extends Model> {
     Logger.log("model: " + model);
     this.sheetName = sheetName;
     this.sheet = getSheetByName(sheetName);
+    this.model = model;
     if (!this.sheet)
       throw new InitializationError(`Unable to retrieve '${sheetName}' sheet`);
     this.load();
@@ -85,6 +86,21 @@ export default class BaseSheetService<T extends Model> {
     if (this.model === null) throw new InitializationError(ERR_MSG_NO_MODEL);
 
     const [, ...rows] = this.sheet.getDataRange().getValues().filter(hasData);
+    Logger.log("***RAW DATA***");
+    const types = rows.map((r) => r.map((c) => typeof c));
+    Logger.log(types);
+    Logger.log(
+      types.reduce((a: string[], c: string[]) => {
+        for (let i = 0; i < a.length; i++) {
+          if (!a[i]) {
+            a[i] = c[i];
+          } else if (!a[i].split(" | ").includes(c[i])) {
+            a[i] = a[i] + " | " + c[i];
+          }
+        }
+        return a;
+      }, new Array(types[0].length).fill(undefined) as string[])
+    );
     this.data = rows.map((row) => new this.model(row));
     Logger.log("Loaded " + this.data.length + " rows");
     Logger.log(this.data);

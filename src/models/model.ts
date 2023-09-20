@@ -3,7 +3,7 @@ export default abstract class Model {
   constructor(data: any[]);
   constructor(data: any) {}
 
-  toArray(): string[] {
+  toArray(): any[] {
     return [];
   }
 }

@@ -1,3 +1,4 @@
+const webpack = require("webpack");
 const path = require("path");
 const GasPlugin = require("gas-webpack-plugin");
 
@@ -25,5 +26,11 @@ module.exports = {
       },
     ],
   },
-  plugins: [new GasPlugin()],
+  plugins: [
+    new GasPlugin(),
+    new webpack.BannerPlugin({
+      banner: "function onOpen(){}\n",
+      raw: true,
+    }),
+  ],
 };

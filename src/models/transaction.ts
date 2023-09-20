@@ -6,24 +6,41 @@ import Model from "./model";
 import { PENDING_DESCRIPTION_PREFIX } from "../shared/constants";
 import categoryService from "../services/category-service";
 
-const columns = Object.freeze({
-  "(Tiller Image)": 0,
-  date: 1,
-  description: 2,
-  category: 3,
-  amount: 4,
-  account: 5,
-  accountNumber: 6,
-  institution: 7,
-  month: 8,
-  week: 9,
-  transactionId: 10,
-  accountId: 11,
-  checkNumber: 12,
-  fullDescription: 13,
-  dateAdded: 14,
-  categorizedDate: 15,
-});
+type TransactionRow = [
+  Date, // date
+  string, // description
+  string, // category
+  number, // amount
+  string, // account
+  string, // accountNumber
+  string, // institution
+  Date, // month
+  Date, // week
+  number | string, // transactionId
+  string, // accountId
+  string, // checkNumber
+  string, // fullDescription
+  Date, // dateAdded
+  Date | string // categorizedDate
+];
+
+enum Column {
+  date,
+  description,
+  category,
+  amount,
+  account,
+  accountNumber,
+  institution,
+  month,
+  week,
+  transactionId,
+  accountId,
+  checkNumber,
+  fullDescription,
+  dateAdded,
+  categorizedDate,
+}
 
 const getInstitution = (institution: string): Institution => {
   switch (institution) {
@@ -70,8 +87,8 @@ export default class Transaction extends Model implements TransactionData {
   categorizedDate?: Date;
 
   constructor(data: TransactionData);
-  constructor(data: any[]);
-  constructor(data: TransactionData | any[]) {
+  constructor(data: TransactionRow);
+  constructor(data: TransactionData | TransactionRow) {
     super(data);
     if (Array.isArray(data)) {
       this.initFromRow(data);
@@ -118,19 +135,19 @@ export default class Transaction extends Model implements TransactionData {
   }
 
   private initFromRow(row: any[]) {
-    this.date = row[columns.date];
-    this.description = row[columns.description];
-    this.category = row[columns.category];
-    this.amount = row[columns.amount];
-    this.account = row[columns.account];
-    this.accountNumber = row[columns.accountNumber];
-    this.institution = getInstitution(row[columns.institution]);
-    this.transactionId = row[columns.transactionId];
-    this.accountId = row[columns.accountId];
-    this.checkNumber = row[columns.checkNumber];
-    this.fullDescription = row[columns.fullDescription];
-    this.dateAdded = row[columns.dateAdded];
-    this.categorizedDate = row[columns.categorizedDate];
+    this.date = row[Column.date];
+    this.description = row[Column.description];
+    this.category = row[Column.category];
+    this.amount = row[Column.amount];
+    this.account = row[Column.account];
+    this.accountNumber = row[Column.accountNumber];
+    this.institution = getInstitution(row[Column.institution]);
+    this.transactionId = row[Column.transactionId];
+    this.accountId = row[Column.accountId];
+    this.checkNumber = row[Column.checkNumber];
+    this.fullDescription = row[Column.fullDescription];
+    this.dateAdded = row[Column.dateAdded];
+    this.categorizedDate = row[Column.categorizedDate];
   }
 
   private initFromObject(data: TransactionData) {
@@ -164,21 +181,21 @@ export default class Transaction extends Model implements TransactionData {
 
   toArray() {
     const row = Array(16).fill("");
-    row[columns.date] = this.date;
-    row[columns.description] = this.description;
-    row[columns.category] = this.category;
-    row[columns.amount] = this.amount;
-    row[columns.account] = this.account;
-    row[columns.accountNumber] = this.accountNumber;
-    row[columns.institution] = this.institution;
-    row[columns.week] = this.week;
-    row[columns.month] = this.month;
-    row[columns.transactionId] = this.transactionId;
-    row[columns.accountId] = this.accountId;
-    row[columns.checkNumber] = this.checkNumber;
-    row[columns.fullDescription] = this.fullDescription;
-    row[columns.dateAdded] = this.dateAdded;
-    row[columns.categorizedDate] = this.categorizedDate;
+    row[Column.date] = this.date;
+    row[Column.description] = this.description;
+    row[Column.category] = this.category;
+    row[Column.amount] = this.amount;
+    row[Column.account] = this.account;
+    row[Column.accountNumber] = this.accountNumber;
+    row[Column.institution] = this.institution;
+    row[Column.week] = this.week;
+    row[Column.month] = this.month;
+    row[Column.transactionId] = this.transactionId;
+    row[Column.accountId] = this.accountId;
+    row[Column.checkNumber] = this.checkNumber;
+    row[Column.fullDescription] = this.fullDescription;
+    row[Column.dateAdded] = this.dateAdded;
+    row[Column.categorizedDate] = this.categorizedDate;
     return row;
   }
 }

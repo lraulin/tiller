@@ -1,7 +1,15 @@
-import { formatDate, parseDate } from "../shared/dates";
-
 import Model from "./model";
-import { parseMoney } from "../shared/money";
+
+type DirectExpressRow = [
+  "Pending" | Date, // Date
+  number, // Transaction ID
+  string, // Description
+  number, // Amount
+  string, // Transaction Type
+  string, // City
+  string, // State
+  string // Country
+];
 
 interface TransactionData {
   date: Date | null;
@@ -30,8 +38,8 @@ export default class DirectExpressTransaction
   isPending: boolean = false;
 
   constructor(data: TransactionData);
-  constructor(data: string[]);
-  constructor(data: TransactionData | string[]) {
+  constructor(data: DirectExpressRow);
+  constructor(data: TransactionData | DirectExpressRow) {
     super(data);
     if (Array.isArray(data)) {
       this.fromRow(data);
@@ -62,11 +70,11 @@ export default class DirectExpressTransaction
     this.isPending = isPending;
   }
 
-  private fromRow(row: string[]) {
-    this.date = row[0] === "Pending" ? null : parseDate(row[0]);
+  private fromRow(row: DirectExpressRow) {
+    this.date = row[0] === "Pending" ? null : row[0];
     this.transactionId = Number(row[1]);
     this.description = row[2];
-    this.amount = parseMoney(row[3]);
+    this.amount = row[3];
     this.transactionType = row[4];
     this.city = row[5];
     this.state = row[6];
@@ -74,12 +82,12 @@ export default class DirectExpressTransaction
     this.isPending = row[0] === "Pending";
   }
 
-  toArray(): string[] {
+  toArray(): DirectExpressRow {
     return [
-      formatDate(this.date) ?? "Pending",
-      this.transactionId.toString(),
+      this.date ?? "Pending",
+      this.transactionId,
       this.description,
-      this.amount.toFixed(2),
+      this.amount,
       this.transactionType,
       this.city,
       this.state,
